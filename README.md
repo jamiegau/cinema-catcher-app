@@ -131,5 +131,24 @@ sudo docker-compose up -d
 You can now type the IP address of the Catcher Server into a browser and continue with the setup of the software.
 If you reboot the server, the docker service should shutdown and restart the catcher docker containers automatically.
 
+### Other usefull commands
+```
+sudo docker-compose ps
+```
+To get the status of the containers.
+
+In the same folder at the config file you till find the command `TAIL.sh`, use this command to monitor the debug output og all of a specific container by giving it the container name.  i.e.
+```
+sudo TAIL.sh backend
+```
+Shutdown the catcher server.
+```
+sudo docker-compose down
+```
+Update the server to latest version of the containers by using the `update.sh` script.  It will shutdown, pull latest containers, update the database if required,  bring the catcher containers back up and delete any older container file left behind.  All in one command.
+```
+sudo update.sh
+```
+
 # Setting up the Software
 
