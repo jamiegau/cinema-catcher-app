@@ -53,6 +53,28 @@ The install path is:  Get suitable hardware, install Ubuntu Server, follow these
 # How to install Catcher
 After installing Ubuntu Server 20.04 LTS, when the computer is ready, you will get a black text only screen with as `login:` prompt.  Login as the user you setup when installing Ubuntu.  This will result in the command prompt.
 ```
-
+jamieg@udev:~$
 ```
+Enter the folowing commands.
+```
+$ sudo apt install git docker-compose
+```
+You will be asked for your password whenever you use `sudo`, or **SuperUser DO** wich runs the command as the root user.
+This will install the docker subsystem that Catcher will run upon and git, so you can download the example `docker-compose.yml` file.
+```
+$ cd /opt
+$ sudo git clone https://github.com/jamiegau/cinema-catcher-app.git
+```
+This will download the example yml config file and other files into a direcory called cinema-catcher-app.  In this directory you control the docker containers and bring up the applicatin and all its services.  See bwlow, but before we do that...
+
+You must also make the following directories and mount your storage disk onto the directory.
+```
+$ sudo mkdir /opt/catcher
+$ sudo mkdir /opt/catcher/storage
+```
+This is where some LINUX knowhow comes in handy as the storage disk, be it a Hardware RAID, software RAID under linux, other mounted from a storage server, must be mounted on the `/opt/catcher/storage` directory.
+
+If you are just taking the simple path and installed the Ubuntu-server onto a large disk.  It will be using the disk you installed the operting system onto as the storage disk.
+
+## Editing the configuration file.
 
