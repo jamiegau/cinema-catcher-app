@@ -51,30 +51,39 @@ The platform for catcher is based on common open source technologies that cinema
 The install path is:  Get suitable hardware, install Ubuntu Server, follow these install instructions below.
 
 # How to install Catcher
-After installing Ubuntu Server 20.04 LTS, when the computer is ready, you will get a black text only screen with as `login:` prompt.  Login as the user you setup when installing Ubuntu.  This will result in the command prompt.
+## Ready your server
+Before you continue, the server needs a number of items.
+- Make the storage directory andmount your storage disk onto that directory.
+- Network and IP address configuration.
+
+### Mounting storage disk
+You must make the following directories and mount your storage disk onto the directory.
 ```
-jamieg@udev:~$
+$ sudo mkdir /opt/catcher
+$ sudo mkdir /opt/catcher/storage
 ```
-Enter the folowing commands.
+This is where some LINUX knowhow comes in handy as the storage disk, be it a Hardware RAID, software RAID under linux, other mounted from a storage server, must be mounted on the `/opt/catcher/storage` directory.  I recomend you google how this is done based on your requirements.
+
+If you are just taking the simple path and installed the Ubuntu-server onto a large disk, you only need to make the directories.  If nothing is mounted on the `storage` directory, the files will be stored on the '/' or root filesystem same as the opertating system in installed upon.
+
+### Setup your network interfaces
+It is recommended that the server has two physical Network interfaces.  One on the typical Internet connected network, and the second on the Projection network.  Many cinemas keep the Projection network on a physically isiloted network so it cannot reach into the internet.  As the catcher needs to talk to the projection network devices and is also likely to pull content from the internet, it will need two seperate interfaces connections, one for each. NOTE: some smaller cinemas, keep this all on the same physical network.  This is simpler for them, and if it works. It works, and is easier to manage.  But in general, seperate physical networks are recommended.
+
+The projection network requires a STATIC IP address as it needs to be refered to in the `docker-compose.yml` file.
+
+## Installing the software
+Enter the folowing commands at the command prompt after you login.
 ```
 $ sudo apt install git docker-compose
 ```
-You will be asked for your password whenever you use `sudo`, or **SuperUser DO** wich runs the command as the root user.
+NOTE: You will be asked for your password whenever you use `sudo`, or **SuperUser DO** which runs the command as the root/super user.
+
 This will install the docker subsystem that Catcher will run upon and git, so you can download the example `docker-compose.yml` file.
 ```
 $ cd /opt
 $ sudo git clone https://github.com/jamiegau/cinema-catcher-app.git
 ```
-This will download the example yml config file and other files into a direcory called cinema-catcher-app.  In this directory you control the docker containers and bring up the applicatin and all its services.  See bwlow, but before we do that...
-
-You must also make the following directories and mount your storage disk onto the directory.
-```
-$ sudo mkdir /opt/catcher
-$ sudo mkdir /opt/catcher/storage
-```
-This is where some LINUX knowhow comes in handy as the storage disk, be it a Hardware RAID, software RAID under linux, other mounted from a storage server, must be mounted on the `/opt/catcher/storage` directory.
-
-If you are just taking the simple path and installed the Ubuntu-server onto a large disk.  It will be using the disk you installed the operting system onto as the storage disk.
+This will download the example yml config file and other files into a direcory called cinema-catcher-app.  In this directory you control the docker containers and bring up the applicatin and all its services.
 
 ## Editing the configuration file.
 
