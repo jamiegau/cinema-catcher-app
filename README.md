@@ -129,6 +129,7 @@ And finally, start the server.
 sudo docker-compose up -d
 ```
 You can now type the IP address of the Catcher Server into a browser and continue with the setup of the software.
+If you reboot the server, the docker service should shutdown and restart the catcher docker containers automatically.
 
 # Setting up the Software
 
