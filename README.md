@@ -137,7 +137,7 @@ sudo docker-compose ps
 ```
 To get the status of the containers.
 
-In the same folder at the config file you till find the command `TAIL.sh`, use this command to monitor the debug output og all of a specific container by giving it the container name.  i.e.
+In the same folder at the config file you till find the command `TAIL.sh`, use this command to monitor the debug output of all (done supply any docker container name) of a specific container by giving it the container name.  i.e.
 ```
 sudo TAIL.sh backend
 ```
