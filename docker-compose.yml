@@ -1,0 +1,177 @@
+#
+# This file is a template example of a docker-compose.yml file used to install catcher app onto a server
+# please see the README.md file for more information.
+#
+# James Gardiner
+#
+version: '3'
+
+services:
+
+  pgdatabase:
+    image: postgres:13.1
+    restart: always
+    ports:
+      - "5435:5432"
+    env_file:
+      - database.env # configure postgres
+    volumes:
+      - /opt/catcher/postgresql/data:/var/lib/postgresql/data/
+    networks:
+      - backend_network
+      - pgdatabase_network
+
+  redis:
+    image: redislabs/redistimeseries:latest
+    hostname: redis
+    restart: always
+    expose:
+      - "6379"
+    networks:
+      - backend_network
+      - tp_network
+      - redis_network
+      - ftpserver_network
+    volumes:
+      - /opt/catcher/redis:/opt/catcher/redis
+    depends_on:
+      - pgdatabase
+
+  backend:
+    image: jamiegau/catcher_backend:3.0
+    restart: always
+    # Set the HOSTNAME the catcher instance will be know as in the conteiner.
+    # for example, catcher-CINEMA-LOCATION such as catcher-chain-state or catcher-clubmovie-forbes
+    hostname: catcher-example
+    security_opt:
+      - seccomp:unconfined
+    privileged: true
+    depends_on:
+      - redis
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    networks:
+      - nginx_network
+      - redis_network
+      - aria2_network
+      - pgdatabase_network
+      - backend_network
+        #    env_file:
+        #      - ./env
+    working_dir: /data/backend
+    command: /usr/bin/daphne dcinenet_catcher.asgi:application -b 0.0.0.0 -p 8000
+    volumes:
+      - /opt/catcher/storage:/opt/catcher/storage
+      - /opt/dcinenet/storage:/opt/dcinenet/storage
+
+  # Celery worker
+  worker:
+    image: jamiegau/catcher_backend:3.0
+    restart: always
+    hostname: worker
+    privileged: true
+    working_dir: /data/backend
+    command: celery -A dcinenet_catcher worker --loglevel=info
+    networks:
+      - nginx_network
+      - redis_network
+      - aria2_network
+      - pgdatabase_network
+      - backend_network
+    depends_on:
+      - redis
+    volumes:
+      - /opt/catcher/storage:/opt/catcher/storage
+      - /opt/dcinenet/storage:/opt/dcinenet/storage
+
+  # Celery Beat
+  beat:
+    image: jamiegau/catcher_backend:3.0
+    restart: always
+    hostname: beat
+    working_dir: /data/backend
+    command: celery -A dcinenet_catcher beat --loglevel=info
+    networks:
+      - nginx_network
+      - redis_network
+      - aria2_network
+      - pgdatabase_network
+      - backend_network
+    depends_on:
+      - redis
+
+  nginx:
+    image: jamiegau/catcher_nginx:3.0
+    hostname: nginx
+    restart: always
+    ports:
+      - "80:80"
+        #      - "443:443"
+    networks:
+      - nginx_network
+      - backend_network
+    # this must be set to the exposed IP adress on the projection network.
+    extra_hosts:
+      - "host.docker.internal:10.30.1.3"
+
+
+  ftpserver:
+    image: jamiegau/catcher_ftpserver:3.0
+    restart: always
+    ports:
+      - 0.0.0.0:20:20
+      - 0.0.0.0:21:21
+      - 21100-21120:21100-21120
+    networks:
+      - ftpserver_network
+    volumes:
+      - /opt/catcher/storage:/opt/catcher/storage
+      - /opt/catcher/ftpserver:/opt/catcher/ftpserver
+    # this must be set to the exposed IP adress on the projection network.
+    extra_hosts:
+      - "host.docker.internal:10.30.1.3"
+    depends_on:
+      - redis
+
+  aria2server:
+    image: jamiegau/catcher_aria2server:3.0
+    hostname: aria2server
+    restart: always
+    ports:
+      - "16888:16888"
+    networks:
+      - aria2_network
+      - backend_network
+      - tp_network
+    volumes:
+      - /opt/catcher/storage:/opt/catcher/storage
+      - /opt/catcher/aria2server:/opt/catcher/aria2server
+    depends_on:
+      - redis
+
+  tp:
+    image: jamiegau/catcher_backend:3.0
+    hostname: tp
+    restart: always
+    working_dir: /data/backend
+    command: python3 manage.py start_proxy
+    networks:
+      - backend_network
+      - aria2_network
+      - pgdatabase_network
+      - tp_network
+    depends_on:
+      - redis
+
+
+networks:
+    redis_network:
+    nginx_network:
+    ftpserver_network:
+    aria2_network:
+    backend_network:
+    pgdatabase_network:
+    tp_network:
+    
