@@ -65,6 +65,9 @@ services:
     volumes:
       - /opt/catcher/storage:/opt/catcher/storage
       - /opt/dcinenet/storage:/opt/dcinenet/storage
+    # IMPORTANT, set the name of your timezone here.
+    environment:
+      - 'TIMEZONE_NAME=Melbourne/Australia'
 
   # Celery worker
   worker:
@@ -85,6 +88,9 @@ services:
     volumes:
       - /opt/catcher/storage:/opt/catcher/storage
       - /opt/dcinenet/storage:/opt/dcinenet/storage
+    # IMPORTANT, set the name of your timezone here.
+    environment:
+      - 'TIMEZONE_NAME=Melbourne/Australia'
 
   # Celery Beat
   beat:
@@ -101,6 +107,9 @@ services:
       - backend_network
     depends_on:
       - redis
+    # IMPORTANT, set the name of your timezone here.
+    environment:
+      - 'TIMEZONE_NAME=Melbourne/Australia'
 
   nginx:
     image: jamiegau/catcher_nginx:3.0
