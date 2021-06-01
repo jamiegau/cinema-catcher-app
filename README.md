@@ -86,7 +86,7 @@ $ sudo git clone https://github.com/jamiegau/cinema-catcher-app.git
 This will download the example yml config file and other files into a direcory called cinema-catcher-app.  In this directory you control the docker containers and bring up the applicatin and all its services.
 
 ## Editing the configuration file.
-The yml config file is in the directory `/opt/cinema-catcher-app`.
+The docker-compose.yml config file is in the directory `/opt/cinema-catcher-app`.
 ```
 $ cd /opt/cinema-catcher-app
 $ sudo nano docker-compose.yml
@@ -94,9 +94,9 @@ $ sudo nano docker-compose.yml
 `nano` is a basic text editor, but `vi` or whatever text editor you are confitable with can be used.
 
 In the configuration file, you will file some aread with `#` comments.
-There are 3 areas to edit before we start the catcher server processes.
+There are numerous areas to edit before you start the catcher server processes.
 
-Firstly, set the hostname of the catcher-server
+Set the hostname of the catcher-server
 ```
 backend:
     image: jamiegau/catcher_backend:3.0
@@ -106,14 +106,18 @@ backend:
     hostname: catcher-example
 ```
 
-Second, set the static IP address you assigned to the network interface on the projection network.  This appear twice in the yml file.
+Set the static IP address you assigned to the network interface on the projection network.  This appear twice in the yml file.
 ```
 extra_hosts:
       - "host.docker.internal:10.30.1.3"
 ```
 In this case, set `10.30.1.3` to the projection netwrok interface static IP.
 
-Once you have edited the ml file.  Its time to pull down all the software from the docker-hub.  To do this type:
+Set the TIMEZONE_NAME environement variable found under the backend, worker and celery container definitions.  This should be set to, for example
+`Melbourne/Australia` or the suitable name for your location.
+
+### Download the software
+Once you have edited the yml file.  Its time to pull down all the software from the docker-hub.  To do this type:
 ```
 $ sudo docker-compose pull
 ```
