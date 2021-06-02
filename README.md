@@ -159,6 +159,6 @@ sudo update.sh
 In the near future a Video tutorial will be created.
 For not, please refer to these other Manuals
 
-General Catcher Manual [a relative link](Manual.md)
+General Catcher Manual [Click to Read](Manual.md)
 
-AutoKDM Manual [a relative link](Manual_AutoKDM.md)
+AutoKDM Manual [Click to Read](Manual_AutoKDM.md)
