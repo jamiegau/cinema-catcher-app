@@ -156,3 +156,9 @@ sudo update.sh
 
 # Setting up the Software
 
+In the near future a Video tutorial will be created.
+For not, please refer to these other Manuals
+
+General Catcher Manual [a relative link](Manual.md)
+
+AutoKDM Manual [a relative link](Manual_AutoKDM.md)
