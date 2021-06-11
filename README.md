@@ -141,7 +141,7 @@ sudo docker-compose ps
 ```
 To get the status of the containers.
 
-In the same folder at the config file you till find the command `TAIL.sh`, use this command to monitor the debug output of all (done supply any docker container name) of a specific container by giving it the container name.  i.e.
+In the same folder at the config file you will find the command `TAIL.sh` (make sure you `chmod 755 TAIL.sh`, so you can execute it as a command first), use this command to monitor the debug output of all (done supply any docker container name) of a specific container by giving it the container name.  i.e.
 ```
 sudo TAIL.sh backend
 ```
@@ -149,7 +149,7 @@ Shutdown the catcher server.
 ```
 sudo docker-compose down
 ```
-Update the server to latest version of the containers by using the `update.sh` script.  It will shutdown, pull latest containers, update the database if required,  bring the catcher containers back up and delete any older container file left behind.  All in one command.
+Update the server to latest version of the containers by using the `update.sh` script (make sure you `chmod 755 update.sh`, so you can execute it as a command first).  It will shutdown, pull latest containers, update the database if required,  bring the catcher containers back up and delete any older container file left behind.  All in one command.
 ```
 sudo update.sh
 ```
