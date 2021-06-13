@@ -161,4 +161,4 @@ For not, please refer to these other Manuals
 
 General Catcher Manual [Click to Read](Manual.md)
 
-AutoKDM Manual [Click to Read](Manual_AutoKDM.md)
+AutoKDM Manual [Click to Read](Manual_AutoKDM.md), Note, only Dolby and Qube DCI-players are currently supported.  GDC would not supply player API, if anyone has GDC API documentation, would appriciate as so can implemented automated KDM ingestion.
