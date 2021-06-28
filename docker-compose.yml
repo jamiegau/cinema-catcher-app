@@ -159,6 +159,8 @@ services:
       - /opt/catcher/aria2server:/opt/catcher/aria2server
     depends_on:
       - redis
+    extra_hosts:
+      - "host.docker.internal:10.30.1.3"
 
   tp:
     image: jamiegau/catcher_backend:3.0
