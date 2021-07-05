@@ -63,6 +63,7 @@ services:
     working_dir: /data/backend
     command: /usr/bin/daphne dcinenet_catcher.asgi:application -b 0.0.0.0 -p 8000
     volumes:
+      - /etc/machine-id:/etc/machine-id
       - /opt/catcher/storage:/opt/catcher/storage
       - /opt/dcinenet/storage:/opt/dcinenet/storage
     # IMPORTANT, set the name of your timezone here.
@@ -86,6 +87,7 @@ services:
     depends_on:
       - redis
     volumes:
+      - /etc/machine-id:/etc/machine-id
       - /opt/catcher/storage:/opt/catcher/storage
       - /opt/dcinenet/storage:/opt/dcinenet/storage
     # IMPORTANT, set the name of your timezone here.
