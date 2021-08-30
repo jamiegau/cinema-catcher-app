@@ -48,6 +48,7 @@ services:
     privileged: true
     depends_on:
       - redis
+      - aria2server
     expose:
       - "8000"
     ports:
