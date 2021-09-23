@@ -25,6 +25,7 @@ services:
     image: redislabs/redistimeseries:latest
     hostname: redis
     restart: always
+    command: ["/usr/local/bin/redis-server", "--loadmodule", "/usr/lib/redis/modules/redistimeseries.so", "--dir", "/opt/catcher/redis/.", "--dbfilename", "redis_dump.rdb", "--save", "300", "100"]
     expose:
       - "6379"
     networks:
