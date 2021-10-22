@@ -19,7 +19,6 @@ services:
       - /opt/catcher/postgresql/data:/var/lib/postgresql/data/
     networks:
       - backend_network
-      - pgdatabase_network
 
   redis:
     image: redislabs/redistimeseries:latest
@@ -30,9 +29,6 @@ services:
       - "6379"
     networks:
       - backend_network
-      - tp_network
-      - redis_network
-      - ftpserver_network
     volumes:
       - /opt/catcher/redis:/opt/catcher/redis
     depends_on:
@@ -50,20 +46,48 @@ services:
     depends_on:
       - redis
       - aria2server
+      - pgdatabase
     expose:
       - "8000"
     ports:
       - "8000:8000"
     networks:
-      - nginx_network
-      - redis_network
-      - aria2_network
-      - pgdatabase_network
       - backend_network
         #    env_file:
         #      - ./env
     working_dir: /data/backend
-    command: /usr/bin/daphne dcinenet_catcher.asgi:application -b 0.0.0.0 -p 8000
+    command: /usr/bin/gunicorn dcinenet_catcher.wsgi:application --bind=0.0.0.0:8000 --timeout 60 --workers 4
+    volumes:
+      - /etc/machine-id:/etc/machine-id
+      - /opt/catcher/storage:/opt/catcher/storage
+      - /opt/dcinenet/storage:/opt/dcinenet/storage
+    # IMPORTANT, set the name of your timezone here.
+    environment:
+      - 'TIMEZONE_NAME=Australia/Melbourne'
+
+  backendc:
+    image: jamiegau/catcher_backend:3.0
+    restart: always
+    # Set the HOSTNAME the catcher instance will be know as in the conteiner.
+    # for example, catcher-CINEMA-LOCATION such as catcher-chain-state or catcher-clubmovie-forbes
+    hostname: catcher-example
+    security_opt:
+      - seccomp:unconfined
+    privileged: true
+    depends_on:
+      - redis
+      - aria2server
+      - pgdatabase
+    expose:
+      - "8001"
+    ports:
+      - "8001:8001"
+    networks:
+      - backend_network
+        #    env_file:
+        #      - ./env
+    working_dir: /data/backend
+    command: /usr/bin/daphne dcinenet_catcher.asgi:application -b 0.0.0.0 -p 8001
     volumes:
       - /etc/machine-id:/etc/machine-id
       - /opt/catcher/storage:/opt/catcher/storage
@@ -79,14 +103,31 @@ services:
     hostname: worker
     privileged: true
     working_dir: /data/backend
-    command: celery -A dcinenet_catcher worker --loglevel=info
+    command: celery -A dcinenet_catcher worker --loglevel=info --concurrency=4 --queues=default
     networks:
-      - nginx_network
-      - redis_network
-      - aria2_network
-      - pgdatabase_network
       - backend_network
     depends_on:
+      - redis
+      - pgdatabase
+    volumes:
+      - /etc/machine-id:/etc/machine-id
+      - /opt/catcher/storage:/opt/catcher/storage
+      - /opt/dcinenet/storage:/opt/dcinenet/storage
+    # IMPORTANT, set the name of your timezone here.
+    environment:
+      - 'TIMEZONE_NAME=Australia/Melbourne'
+
+  worker_mon:
+    image: jamiegau/catcher_backend:3.0
+    restart: always
+    hostname: worker
+    privileged: true
+    working_dir: /data/backend
+    command: celery -A dcinenet_catcher worker --loglevel=WARNING --concurrency=4 --queues=status_monitor
+    networks:
+      - backend_network
+    depends_on:
+      - pgdatabase
       - redis
     volumes:
       - /etc/machine-id:/etc/machine-id
@@ -104,12 +145,9 @@ services:
     working_dir: /data/backend
     command: celery -A dcinenet_catcher beat --loglevel=info
     networks:
-      - nginx_network
-      - redis_network
-      - aria2_network
-      - pgdatabase_network
       - backend_network
     depends_on:
+      - pgdatabase
       - redis
     # IMPORTANT, set the name of your timezone here.
     environment:
@@ -123,7 +161,6 @@ services:
       - "80:80"
         #      - "443:443"
     networks:
-      - nginx_network
       - backend_network
     # this must be set to the exposed IP adress on the projection network.
     extra_hosts:
@@ -138,7 +175,7 @@ services:
       - 0.0.0.0:21:21
       - 21100-21120:21100-21120
     networks:
-      - ftpserver_network
+      - backend_network
     volumes:
       - /opt/catcher/storage:/opt/catcher/storage
       - /opt/catcher/ftpserver:/opt/catcher/ftpserver
@@ -155,9 +192,7 @@ services:
     ports:
       - "16888:16888"
     networks:
-      - aria2_network
       - backend_network
-      - tp_network
     volumes:
       - /opt/catcher/storage:/opt/catcher/storage
       - /opt/catcher/aria2server:/opt/catcher/aria2server
@@ -174,9 +209,6 @@ services:
     command: python3 manage.py start_proxy
     networks:
       - backend_network
-      - aria2_network
-      - pgdatabase_network
-      - tp_network
     depends_on:
       - redis
       
@@ -195,11 +227,5 @@ services:
       - /opt/catcher/storage:/opt/catcher/storage
 
 networks:
-    redis_network:
-    nginx_network:
-    ftpserver_network:
-    aria2_network:
     backend_network:
-    pgdatabase_network:
-    tp_network:
     
