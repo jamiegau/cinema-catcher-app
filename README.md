@@ -21,6 +21,7 @@ The objective of this application is for do the following:
 - Acts as a central location for all incoming content that ensures if a problem exists with content, the cinema operator is informed of this on arrival. This ensures no last minute emergencies occur as problems are only apparent when a user attempts to utilise content.
 - Automatically inspects an Email account for any KDM messages, downloads, unzips, and ingests KDM automatically. **Never have to deal with a KDM again.** NOTE: Dolby and Qube IMS are only supported at this time.
 - Emails the cinema owners of all activity and specifically if a problem occurs as so the cinema operator can address it before it becomes an emergency.  For example, if a DCP coming into the cinema is corrupted in any way.
+- Screen Player monitor overview page (All configured screens), status of current playout, time to credits/finish, time of next event/triggers, time of next scheduled session start.
 
 The catcher application is a set and forget tool.  Typically if everything is going well, you don't even need to log into its interface.
 
@@ -85,39 +86,38 @@ $ sudo git clone https://github.com/jamiegau/cinema-catcher-app.git
 ```
 This will download the example yml config file and other files into a direcory called cinema-catcher-app.  In this directory you control the docker containers and bring up the applicatin and all its services.
 
-## Editing the configuration file.
-The docker-compose.yml config file is in the directory `/opt/cinema-catcher-app`.
+## Create the configuration file.
+Create a file called `local.env.sh` file is in the directory `/opt/cinema-catcher-app`.
 ```
 $ cd /opt/cinema-catcher-app
-$ sudo nano docker-compose.yml
+$ sudo nano local.env.sh
 ```
 `nano` is a basic text editor, but `vi` or whatever text editor you are confitable with can be used.
 
-In the configuration file, you will file some aread with `#` comments.
-There are numerous areas to edit before you start the catcher server processes.
+Copy the following into the file:
+```
+LOCAL_TIMEZONE_NAME=Australia/Brisbane
+CATCHER_HOSTNAME=catcher-location-name
+EXPOSED_IP_PROJECTION_NETWORK=x.x.x.x
+export LOCAL_TIMEZONE_NAME CATCHER_HOSTNAME EXPOSED_IP_PROJECTION_NETWORK
+```
+Update these three variables as described by their names.
+`EXPOSED_IP_PROJECTION_NETWORK` is the static IP address you assigned to the network interface on the projection network.
 
-Set the hostname of the catcher-server
-```
-backend:
-    image: jamiegau/catcher_backend:3.0
-    restart: always
-    # Set the HOSTNAME the catcher instance will be know as in the conteiner.
-    # for example, catcher-CINEMA-LOCATION such as catcher-chain-state or catcher-clubmovie-forbes
-    hostname: catcher-example
-```
+Set the TIMEZONE_NAME environement variable.  This should be set to, for example
+`Melbourne/Australia` or the suitable name for your location. (see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of names.)
 
-Set the static IP address you assigned to the network interface on the projection network.  This appear twice in the yml file.
+Make sure the following files are executable with this command
 ```
-extra_hosts:
-      - "host.docker.internal:10.30.1.3"
+$ chmod 755 local.env.sh TAIL.sh update.sh start.sh
 ```
-In this case, set `10.30.1.3` to the projection netwrok interface static IP.
-
-Set the TIMEZONE_NAME environement variable found under the backend, worker and celery container definitions.  This should be set to, for example
-`Melbourne/Australia` or the suitable name for your location.
+Source the local.env.sh file to make sure your local config is set in your shell.
+```
+$ ./local.env.sh
+```
 
 ### Download the software
-Once you have edited the yml file.  Its time to pull down all the software from the docker-hub.  To do this type:
+Once you have created the local config file.  Its time to pull down all the software from the docker-hub.  To do this type:
 ```
 $ sudo docker-compose pull
 ```
