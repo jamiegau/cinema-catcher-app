@@ -1,4 +1,5 @@
-# Catcher server for cinema exhibitors
+# Catcher server, free productivity tools for cinema exhibitors
+![Screen shot of Player-Status screen](images/catcher-screenshot-PlayerStatus.png?raw=true "Screen shot of Player-Status Screen")
 ## What is a catcher server?
 As cinemas transition to an ever more IT centric way of operation, many aspects of running a cinema can be automated.  Catcher is a free to use tool that automates many aspects of running a cinema reducing the running costs.
 
@@ -24,6 +25,14 @@ The objective of this application is for do the following:
 - Screen Player monitor overview page (All configured screens), status of current playout, time to credits/finish, time of next event/triggers, time of next scheduled session start.
 
 The catcher application is a set and forget tool.  Typically if everything is going well, you don't even need to log into its interface.
+
+# Supported Cinema Equipment
+The following equipment are slated for integration into this toolset.
+
+- Cinema-player: Dolby and Qube is mostly complete.  Barco is coming in 3 months or so, after we can get access to a Barco ICMP to test against (COVID crisis slowing things down a lot). GDC will not be suported as GDC have refused to allow the implementaion of their API. This is disappointing position by GDC as many small independants cinemas who could take advatage of this tool utilise GDC equipment.
+- Projectors: NEC and Barco are in the works.
+- Sound processors: JSD/QSC, Dolby are in the works.
+- IO-control: RLY-8 and JNior are in the wortks.
 
 # Reporting bugs and errors
 Please utilise the github page and its issue tracker to report issues you may find.
