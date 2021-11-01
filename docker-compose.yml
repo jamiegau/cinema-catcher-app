@@ -146,7 +146,7 @@ services:
     restart: always
     hostname: beat
     working_dir: /data/backend
-    command: celery -A dcinenet_catcher beat --loglevel=info
+    command: celery -A dcinenet_catcher beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     networks:
       - backend_network
     depends_on:
