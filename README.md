@@ -29,7 +29,7 @@ The catcher application is a set and forget tool.  Typically if everything is go
 # Supported Cinema Equipment
 The following equipment are slated for integration into this toolset.
 
-- Cinema-player: Dolby and Qube is mostly complete.  Barco is coming in 3 months or so, after we can get access to a Barco ICMP to test against (COVID crisis slowing things down a lot). GDC will not be suported as GDC have refused to allow the implementaion of their API. This is disappointing position by GDC as many small independants cinemas who could take advatage of this tool utilise GDC equipment.
+- Cinema-player: Dolby and Qube is mostly complete.  Barco is coming in 3 months or so, after we can get access to a Barco ICMP to test against (COVID crisis slowing things down a lot). GDC has recently come onboard and will also be supported in coming months.
 - Projectors: NEC and Barco are in the works.
 - Sound processors: JSD/QSC, Dolby are in the works.
 - IO-control: RLY-8 and JNior are in the wortks.
@@ -170,4 +170,4 @@ For not, please refer to these other Manuals
 
 General Catcher Manual [Click to Read](Manual.md)
 
-AutoKDM Manual [Click to Read](Manual_AutoKDM.md), Note, only Dolby and Qube DCI-players are currently supported.  GDC would not supply player API, if anyone has GDC API documentation, would appriciate as so can implemented automated KDM ingestion.
+AutoKDM Manual [Click to Read](Manual_AutoKDM.md), Note, only Dolby and Qube DCI-players are currently supported.  GDC and Barco will be aded in time.
