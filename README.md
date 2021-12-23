@@ -5,6 +5,59 @@ As cinemas transition to an ever more IT centric way of operation, many aspects 
 
 This tool is focused on smaller cinemas, as some of the features are addressed in larger TMS system bigger operators would already utilise.  However, even larger cinemas may fine the ease of moving content around and a central autonomous LMS and KDM manager desirable.
 
+## Current Status
+This tool is still under development and should be considefed Beta Status.  Although some aspects the tools in this are finished, major changes are in the works to implement some of the new advanced features.  Is is expected the major updates should be finished by Feb 2022 and a more production ready version should be available.  However, in the mean time, it would be great if some advanced users could try of the development versiont to contributoe to bugs and potential improvements and suggestions for future developments.
+
+## Feature development status
+<pre>
+                               Dolby    GDC     Qube    Barco
+Player Status Monitor    -     Done    Done     Started Future
+Player Status Control    -     Done    Started  Future  Future
+--------------------------------------------------------------
+Player Status SoundProc  -     Future, JSD100/60
+--------------------------------------------------------------
+                               Barco   NEC      Christie
+Player Status Projector  -     Future  Future   NotPlanned
+--------------------------------------------------------------
+                               JNOR    RLY8
+Player Status IO Box     -     Futrue  Future
+--------------------------------------------------------------
+                               Dolby    GDC     Qube    Barco
+Schedule Status          -     Future   Future  Future  Future
+--------------------------------------------------------------
+Media Asset solution
+Ingest Local Devices                    Done
+Ingest from FileSystem                  Done
+Ingest from FTP share                   Done
+Auto Ingest on discovery                Done
+Auto Quality Cheap (Clairmeta)          Done
+Auto Delete Older content               Done
+Protect from Auto Delete                Done
+FTP access to all Ingested              Done
+--------------------------------------------------------------
+AutoKDM
+Creation of Screen data interface       Done
+Auto pull Cert from Player              Dolby&Qube Done, GDC&Barco Future
+Creation screen to input IMAP sources   Done
+Auto download Emails from IMAP source   Done
+Auto scan and push found KDMS           Done
+Real time email endpoint ingest         Done
+Ingest KDM into Players                 Dolby&Qube Done, GDC&Barco Future
+--------------------------------------------------------------
+Transfers application
+This tool is not intended for general use.  It is a DCP distribution system and point implementation
+that is part of other solutions such as internal DCP distributrion solutions for cinema chains, advertising
+agents or smaller community of DCP content ditribution (i.e. small country adoptions etc.)
+Developed to use open standard protocols for security, speed and ease of scaling up as needed.
+Contact The develpoper if you are interested in investigating this tool set.
+--------------------------------------------------------------
+Playout Audit
+Under development, a tool to monitor and create reports regarding what has been played out from specific Players.
+Tools to generate reports or push selected data into business partners databases APIs.
+Development roadmap is end March 2022
+</pre>
+
+
 ## Who made the product and why?
 The Catcher application was made by a small Australia company (https://www.digitall.net.au) that develops IP for operating autonomous cinema locations.  Due to the COVID crisis and the change in industry norms, such as "Streaming First" initiatives by the major exhibitors and a reduction in windows from 90 to 45 days, the result will be a reduction in attendance for cinemas as consumers change behaviour and take advantage of these offerings.  The objective for making part of the IP available under a free to use model is to ensure the culture of cinemas can metabolize these changes.  For example, if a small cinema loses 10-20% of attendance, but also drops its running costs by 10-20% by becoming more productive in operating the cinema, there is an overall 0 net loss.  Ensuring cinemas are more likely to survive the changes occuring.
 
