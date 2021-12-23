@@ -57,6 +57,8 @@ Tools to generate reports or push selected data into business partners databases
 Development roadmap is end March 2022
 </pre>
 
+It is recommended you create an account on GitHub and then monitor this project for updates as so you are informed when new features are made available.  
+Plus to report bugs or suggestions, please use your Github account to leave reports on the "Issues" page for this GitHub project.
 
 ## Who made the product and why?
 The Catcher application was made by a small Australia company (https://www.digitall.net.au) that develops IP for operating autonomous cinema locations.  Due to the COVID crisis and the change in industry norms, such as "Streaming First" initiatives by the major exhibitors and a reduction in windows from 90 to 45 days, the result will be a reduction in attendance for cinemas as consumers change behaviour and take advantage of these offerings.  The objective for making part of the IP available under a free to use model is to ensure the culture of cinemas can metabolize these changes.  For example, if a small cinema loses 10-20% of attendance, but also drops its running costs by 10-20% by becoming more productive in operating the cinema, there is an overall 0 net loss.  Ensuring cinemas are more likely to survive the changes occuring.
