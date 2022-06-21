@@ -52,8 +52,8 @@ Developed to use open standard protocols for security, speed and ease of scaling
 Contact The develpoper if you are interested in investigating this tool set.
 --------------------------------------------------------------
 Playout Audit
-Finished (Needs testing). Is a tool to monitor and create reports regarding what has been played out 
-from specific DCI-Cinema-Players. (Barco, Dolby, GDC, Qube are supported)
+Finished in version 3.1.144 and above (Needs testing). Is a tool to monitor and create reports regarding what has been 
+played out from specific DCI-Cinema-Players. (Barco, Dolby, GDC, Qube are supported)
 This tool allows the user to create complex filters to datamine the logs for numerous reasons. 
 It is especially usefull for sending audit of playout for internal or external (Advertising agency) needs.
 It can send Emails with attchaed CSV files, or push data directly into JSON endpoints for injecting 
