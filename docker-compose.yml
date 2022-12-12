@@ -12,7 +12,7 @@ services:
     image: postgres:13.1
     restart: always
     ports:
-      - "5435:5432"
+      - "5432:5432"
     env_file:
       - database.env # configure postgres
     volumes:
