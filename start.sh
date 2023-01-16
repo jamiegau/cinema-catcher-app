@@ -1,2 +1,2 @@
 source ./local.env.sh
-docker-compose up -d
+docker compose up -d
