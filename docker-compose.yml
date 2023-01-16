@@ -64,7 +64,7 @@ services:
     # IMPORTANT, set the name of your timezone here.
     environment:
       - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
-      - 'IN_PRODUCTION=True'
+      - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
 
   backendc:
     image: jamiegau/catcher_backend:3.0
@@ -95,7 +95,7 @@ services:
     # IMPORTANT, set the name of your timezone here.
     environment:
       - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
-      - 'IN_PRODUCTION=True'
+      - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
 
   # Celery worker
   worker:
@@ -117,7 +117,7 @@ services:
     # IMPORTANT, set the name of your timezone here.
     environment:
       - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
-      - 'IN_PRODUCTION=True'
+      - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
 
   worker_mon:
     image: jamiegau/catcher_backend:3.0
@@ -138,7 +138,7 @@ services:
     # IMPORTANT, set the name of your timezone here.
     environment:
       - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
-      - 'IN_PRODUCTION=True'
+      - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
 
   # Celery Beat
   beat:
@@ -155,7 +155,7 @@ services:
     # IMPORTANT, set the name of your timezone here.
     environment:
       - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
-      - 'IN_PRODUCTION=True'
+      - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
 
   nginx:
     image: jamiegau/catcher_nginx:3.0
