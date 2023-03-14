@@ -16,67 +16,67 @@ The following features are ready for production.  The goal of the system is a se
 
 The features of the catcher application are also independent and the user can use one or more of the tools it comes with depending on their needs.  It is not all or none.  Its ala carte.  Only utilise the tools that best suit you.
 
-| Feature | Description  | Status |
-| ------- | -------------| ------ |
-| LMS (Library Management System) | This feature includes the ability to ingest content from  physical disks and USBs or from FTP servers, local or remote.  Devices can be set to periodically scan and ingest any DCP found.  ClairMeta is then used to Quality-Check the DCP.  Finally, Email reports can be generated automatically. Oldest Assets are automatically deleted as needed. Assets can be marked to never delete. As a LMS, all content is then made available via FTP server, for Screen-DCI-Player to ingest any content in the Library. <br/>Online Video Overview: hello | Production |
-| Status Monitor | This tool allows you to monitor all screen configured into the system.  Ths can be used to monitor local or numerous remote screens | Production limited functionality | 
-| Status Monitor device Control | Under development and extending the status Monitor, you can take control of any DCI-Player, Sound-processor, Projector, IO-Device directly to override or manually control a screen if required | Development |
-| Schedule Monitor | This screen monitors screens on a Schedule level showing a timeline for each screen and what sessions are playing at what time and when they finish/start | Not Started |
-| AutoKDM | Is a tool that can monitor an IMAP access to an Email account.  It will transparently read your Email, and only download Emails that contain KDMs, mark them as read, or even move them into another folder (Only if a KDM is discovered).  It is best to have a dedicated Email for KDMs however, the tool can deal with utilising an Email that is also used by humans for general Email activity.  The tool will download all KDMs into a data base for checking, tracking and finally ingesting into the target player.  Based on configured target players, AutoKDM will ingest KDMs automatically to all target screens automatically.  Reports on activity can be emailed to the Admin if required. The system incorporates KDM INFO Emails for users can easily track back to the KDM creator if problems occur. | Production |
-| KDM Alert | This tool generates daily reports sent to the Staff that inform of any scheduled session that do not yet have a KDM to allow them to play.  This tool ensures a cinema knowns days in advance if a KDM has failed to arrive, giving them time to react to the error. | Production |
-| Auto Discovery | Based on the open source tool cinema-nmap-scripts (https://github.com/jamiegau/cinema-nmap-scripts).  It will automatically detect well known devices on the Projection network, pulling Version numbers when possible.  The tool can then be used to audit your projection equipment and can automatically detect the change in any version of DCI-equipment sending/Emailing a Report when changes occur.  Plans to incorporate this with an FLM tool has been discussed.) <br/>Tool Overview: https://youtu.be/7JnhEDdOobo <br/>NMAP tool: https://youtu.be/1ZUCCIH4OYA | Production, but limited by devices supported in the cinema-nmap-scripts project |
-| Player Audit | This tool periodically downloads playout logs from the DCI-Players.  This allows the creation of reports to analyise the activity on a player.  This can be used to send playout reports for Advertisers or for engineers to get a detailed indication of the activity on a player. For example, you can detect if shows are playing outside of open hours, or if manual control is occurring and how often. This can be done by either an Email report containing a CSV-file, or automatically sending playout reports to a specified WEB End-point (Internet Web Address) that the data is pushed to periodically. <br/> Tool Overview: https://youtu.be/7ZEj2FhvOis| Production |
+| Feature                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Status                                                                          |
+|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| LMS (Library Management System) | This feature includes the ability to ingest content from  physical disks and USBs or from FTP servers, local or remote.  Devices can be set to periodically scan and ingest any DCP found.  ClairMeta is then used to Quality-Check the DCP.  Finally, Email reports can be generated automatically. Oldest Assets are automatically deleted as needed. Assets can be marked to never delete. As a LMS, all content is then made available via FTP server, for Screen-DCI-Player to ingest any content in the Library. <br/><br/>Online Video Overview: https://youtu.be/G0GvkAnYvt0                                                                                                                                                                                                                                                                                                   | Production                                                                      |
+| Status Monitor                  | This tool allows you to monitor all screen configured into the system.  Ths can be used to monitor local or numerous remote screens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Production limited functionality                                                | 
+| Status Monitor device Control   | Under development and extending the status Monitor, you can take control of any DCI-Player, Sound-processor, Projector, IO-Device directly to override or manually control a screen if required                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Development                                                                     |
+| Schedule Monitor                | This screen monitors screens on a Schedule level showing a timeline for each screen and what sessions are playing at what time and when they finish/start                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Not Started                                                                     |
+| AutoKDM                         | Is a tool that can monitor an IMAP access to an Email account.  It will transparently read your Email, and only download Emails that contain KDMs, mark them as read, or even move them into another folder (Only if a KDM is discovered).  It is best to have a dedicated Email for KDMs however, the tool can deal with utilising an Email that is also used by humans for general Email activity.  The tool will download all KDMs into a data base for checking, tracking and finally ingesting into the target player.  Based on configured target players, AutoKDM will ingest KDMs automatically to all target screens automatically.  Reports on activity can be emailed to the Admin if required. The system incorporates KDM INFO Emails for users can easily track back to the KDM creator if problems occur. <br/><br/>Online Video Overview: https://youtu.be/zjN9h2T82js | Production                                                                      |
+| KDM Alert                       | This tool generates daily reports sent to the Staff that inform of any scheduled session that do not yet have a KDM to allow them to play.  This tool ensures a cinema knowns days in advance if a KDM has failed to arrive, giving them time to react to the error. <br/><br/>Online Video Overview: https://youtu.be/1WV9WR4vVxM                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Production                                                                      |
+| Auto Discovery                  | Based on the open source tool cinema-nmap-scripts (https://github.com/jamiegau/cinema-nmap-scripts).  It will automatically detect well known devices on the Projection network, pulling Version numbers when possible.  The tool can then be used to audit your projection equipment and can automatically detect the change in any version of DCI-equipment sending/Emailing a Report when changes occur.  Plans to incorporate this with an FLM tool has been discussed.) <br/><br/>Tool Overview: https://youtu.be/7JnhEDdOobo <br/>NMAP tool: https://youtu.be/1ZUCCIH4OYA                                                                                                                                                                                                                                                                                                        | Production, but limited by devices supported in the cinema-nmap-scripts project |
+| Player Audit                    | This tool periodically downloads playout logs from the DCI-Players.  This allows the creation of reports to analyise the activity on a player.  This can be used to send playout reports for Advertisers or for engineers to get a detailed indication of the activity on a player. For example, you can detect if shows are playing outside of open hours, or if manual control is occurring and how often. This can be done by either an Email report containing a CSV-file, or automatically sending playout reports to a specified WEB End-point (Internet Web Address) that the data is pushed to periodically. <br/><br/> Tool Overview: https://youtu.be/7ZEj2FhvOis                                                                                                                                                                                                            | Production                                                                      |
 
 
 ## Feature development status
 
-|                            | Dolby  |  GDC    | Qube    | Barco   |
-| -------------------------- | ------ | ------- | ------- | ------  |  
-| Player Status Monitor      | Done   | Done    | Started | Started |
-| Player Status Control      | Partial   | Started | Partial  | Future  |
+|                            | Dolby      | GDC     | Qube    | Barco   |
+|----------------------------|------------|---------|---------|---------|
+| Player Status Monitor      | Done       | Done    | Started | Started |
+| Player Status Control      | Partial    | Started | Partial | Future  |
 
-|                            | Status | Vendors   |
-| -------------------------- | --- | --- |
-| Player Status Sound-Processors    | Future | JSD100/60 |
+|                                | Status | Vendors   |
+|--------------------------------|--------|-----------|
+| Player Status Sound-Processors | Future | JSD100/60 |
 
-|                          | Barco | NEC | Christie |
-|--------------------------|-------|-----|----------|
-| Player Status Projector  | Future | Future | long term Future |
+|                         | Barco  | NEC    | Christie         |
+|-------------------------|--------|--------|------------------|
+| Player Status Projector | Future | Future | long term Future |
 
 | | JNIOR | RLY8 | KMTronic |
 |-|-------|------|----------|
 | Player Status IO Box | Futrue | Future | Future |
 
-|                            | Dolby  |  GDC    | Qube    | Barco   |
-| -------------------------- | ------ | ------- | ------- | ------  |  
-| Schedule Status Monitor    | Future | Future  | Future   | Future |
+|                            | Dolby  | GDC     | Qube    | Barco   |
+|----------------------------|--------|---------|---------|---------|
+| Schedule Status Monitor    | Future | Future  | Future  | Future  |
 
-|  Media Asset Solution Features         | Progress |
-| -------------------------------------- | ---- |
-| Ingest Local Devices                   | Done |
-| Ingest from FileSystem                 | Done |
-| Ingest from FTP share                  | Done |
-| Auto Ingest on discovery               | Done |
-| Auto Quality Cheap (Clairmeta)         | Done |
-| Auto Delete Older content              | Done |
-| Protect from Auto Delete               | Done |
-| FTP access to all Ingested             | Done |
+| Media Asset Solution Features  | Progress |
+|--------------------------------|----------|
+| Ingest Local Devices           | Done     |
+| Ingest from FileSystem         | Done     |
+| Ingest from FTP share          | Done     |
+| Auto Ingest on discovery       | Done     |
+| Auto Quality Cheap (Clairmeta) | Done     |
+| Auto Delete Older content      | Done     |
+| Protect from Auto Delete       | Done     |
+| FTP access to all Ingested     | Done     |
 
-| AutoKDM and Alert-KDM Features         | Progress (Dolby, GDC, Qube, Barco) |
-| -------------------------------------- | ---- |
-| Creation of Screen data interface      | Done |
-| Auto pull Cert from Player             | Done |
-| Creation screen to input IMAP sources  | Done |
-| Auto download Emails from IMAP source  | Done |
-| Auto scan and push found KDMS          | Done |
-| Real time email endpoint ingest        | Done |
-| Ingest KDM into Players                | Done |
-| Real time Email to KDM ingest          | Possible but needs extra infrastructure |
-| Schedule inspect                       | Done |
-| Schedule to Session/CPL matching       | Done |
-| Schedule/Session/CPL to KDM matching   | Done |
-| Report generation and Email            | Done |
-| Report setup, history and manual control | Done |
+| AutoKDM and Alert-KDM Features           | Progress (Dolby, GDC, Qube, Barco)      |
+|------------------------------------------|-----------------------------------------|
+| Creation of Screen data interface        | Done                                    |
+| Auto pull Cert from Player               | Done                                    |
+| Creation screen to input IMAP sources    | Done                                    |
+| Auto download Emails from IMAP source    | Done                                    |
+| Auto scan and push found KDMS            | Done                                    |
+| Real time email endpoint ingest          | Done                                    |
+| Ingest KDM into Players                  | Done                                    |
+| Real time Email to KDM ingest            | Possible but needs extra infrastructure |
+| Schedule inspect                         | Done                                    |
+| Schedule to Session/CPL matching         | Done                                    |
+| Schedule/Session/CPL to KDM matching     | Done                                    |
+| Report generation and Email              | Done                                    |
+| Report setup, history and manual control | Done                                    |
 
 # Documentation
 
