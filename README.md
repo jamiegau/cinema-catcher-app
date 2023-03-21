@@ -308,6 +308,17 @@ root@catcher-dev:/opt/cinema-catcher-app# docker compose up -d
 You can now type the IP address of the Catcher Server into a browser and continue with the setup of the software.
 If you reboot the server, the docker service should shutdown and restart the catcher docker containers automatically.
 
+### Default Login
+Once the system is running, you can go to the USER-INTERFACE by using your browser
+and typing the IP address of the server you installed the cinema-catcher-app on to.
+This will brig up a LOGIN-PROMPT.  The default username and password is:
+```
+Username: admin
+Password: admin
+```
+Once you login you can change the password and/or create users from
+the **Admin -> Users** menu on the left of the interface.
+
 ### Other usefull commands
 ```
 root@catcher-dev:/opt/cinema-catcher-app# docker compose ps
