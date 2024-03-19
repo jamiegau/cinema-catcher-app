@@ -18,7 +18,7 @@ The features of the catcher application are also independent and the user can us
 
 | Feature                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Status                                                                          |
 |---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| LMS (Library Management System) | This feature includes the ability to ingest content from  physical disks and USBs or from FTP servers, local or remote.  Devices can be set to periodically scan and ingest any DCP found.  ClairMeta is then used to Quality-Check the DCP.  Finally, Email reports can be generated automatically. Oldest Assets are automatically deleted as needed. Assets can be marked to never delete. As a LMS, all content is then made available via FTP server, for Screen-DCI-Player to ingest any content in the Library. <br/><br/>Online Video Overview: https://youtu.be/G0GvkAnYvt0                                                                                                                                                                                                                                                                                                   | Production                                                                      |
+| LMS (Library Management System) | This feature includes the ability to ingest content from  physical disks and USBs or from FTP servers, local or remote.  Devices can be set to periodically scan and ingest any DCP found.  ClairMeta is then used to Quality-Check the DCP.  Finally, Email reports can be generated automatically. Oldest Assets are automatically deleted as needed. Assets can be marked to never delete. As a LMS, all content is then made available via FTP server, for Screen-DCI-Player to ingest any content in the Library. <br/><br/>New Feture, FTP upload DCP into LMS capbility<br/><br/>Online Video Overview: https://youtu.be/G0GvkAnYvt0                                                                                                                                                                                                                                            | Production                                                                      |
 | Status Monitor                  | This tool allows you to monitor all screen configured into the system.  Ths can be used to monitor local or numerous remote screens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Production limited functionality                                                | 
 | Status Monitor device Control   | Under development and extending the status Monitor, you can take control of any DCI-Player, Sound-processor, Projector, IO-Device directly to override or manually control a screen if required                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Development                                                                     |
 | Schedule Monitor                | This screen monitors screens on a Schedule level showing a timeline for each screen and what sessions are playing at what time and when they finish/start                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Not Started                                                                     |
@@ -226,9 +226,8 @@ jamieg@catcher-dev:~$
 
 You now have the lastes docker installed, and can be checked with the command:
 ```
-jamieg@catcher-dev:~$ sudo docker --version
+sudo docker --version
 Docker version 20.10.22, build 3a2c30b
-jamieg@catcher-dev:~$
 ```
 You should have the above version or greater.
 `docker-compose` is now installed as part of docker and is no longer an extra install requirement.
@@ -236,24 +235,24 @@ You should have the above version or greater.
 ### Other required tools
 
 ```
-$ sudo apt install git
+sudo apt install git
 ```
 
 Now lets download the base `docker-compose.yml` file what describes to docker how to download and run the software.  We do this by cloning the files down from Github.
 
 ```
-$ cd /opt
-$ sudo git clone https://github.com/jamiegau/cinema-catcher-app.git
+cd /opt
+sudo git clone https://github.com/jamiegau/cinema-catcher-app.git
 ```
-This will download the example yml config file and other files into a direcory called `cinema-catcher-app` into your current directory that should be `/opt`.  In this directory you control the docker containers and bring up the application and all its services.  But before that can occur, you must setup some local variables.
+This will download the example yml config file and other files into a directory called `cinema-catcher-app` into your current directory that should be `/opt`.  In this directory you control the docker containers and bring up the application and all its services.  But before that can occur, you must setup some local variables.
 
 ## Create the configuration file.
-Create a file called `local.env.sh` file is in the directory `/opt/cinema-catcher-app`.
+Create a file called `.env` file is in the directory `/opt/cinema-catcher-app`.
 ```
-$ cd /opt/cinema-catcher-app
-$ sudo nano local.env.sh
+cd /opt/cinema-catcher-app
+sudo nano .env
 ```
-`nano` is a basic text editor, but `vi` or whatever text editor you are confitable with can be used.
+`nano` is a basic text editor, but `vi` or whatever text editor you are comfortable with can be used.
 
 Copy the following into the file:
 ```
@@ -261,40 +260,34 @@ LOCAL_TIMEZONE_NAME=Australia/Brisbane
 CATCHER_HOSTNAME=catcher-location-name
 EXPOSED_IP_PROJECTION_NETWORK=x.x.x.x
 IN_PRODUCTION=True
-export LOCAL_TIMEZONE_NAME CATCHER_HOSTNAME EXPOSED_IP_PROJECTION_NETWORK
 ```
 Update these three variables as described by their names.
 `EXPOSED_IP_PROJECTION_NETWORK` is the static IP address you assigned to the network interface on the projection network.
 
 `IN_PRODUCTION` can be set to False, to enable debug logging in the application containers.  (See the `docker-compose.yml` file for more detail.)
 
-Set the TIMEZONE_NAME environement variable.  This should be set to, for example
+Set the TIMEZONE_NAME environment variable.  This should be set to, for example
 `Melbourne/Australia` or the suitable name for your location. (see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of names.)
 
 Make sure the following files are executable with this command
 ```
-jamieg@catcher-dev:~$ sudo chmod 755 local.env.sh TAIL.sh update.sh start.sh
+sudo chmod 755 local.env.sh TAIL.sh update.sh start.sh
 ```
 
 It is recommended that you start a ROOT bash shell when doing these commands.
 ```
-jamieg@catcher-dev:/opt/cinema-catcher-app$ sudo bash
+sudo bash
 root@catcher-dev:/opt/cinema-catcher-app#
 ```
 
 You can see you now have `root` in the prompt and a hash `#` at the end, indicating you are now running as a root user. (Be careful)
-
-Source the local.env.sh file to make sure your configuration environment variables are set in your shell.  (You will likely get a warning if they are not set.  Control-C to stop, and make sure your environment variables are set and try again.)
-```
-root@catcher-dev:/opt/cinema-catcher-app# source local.env.sh
-```
 
 ### Download the software
 Once you have created the local config file.  Its time to pull down all the software from the docker-hub.  To do this type:
 ```
 root@catcher-dev:/opt/cinema-catcher-app# docker compose pull
 ```
-This will take some as neat 2GB of applications will be downloeded.  Get a coffie..
+This will take some as neat 2GB of applications will be downloaded.  Get a coffee..
 
 Once this has completed, type the next command to initialise the install (ie, the database etc.)
 ```
@@ -319,7 +312,7 @@ Password: admin
 Once you login you can change the password and/or create users from
 the **Admin -> Users** menu on the left of the interface.
 
-### Other usefull commands
+### Other useful commands
 ```
 root@catcher-dev:/opt/cinema-catcher-app# docker compose ps
 ```

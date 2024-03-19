@@ -19,6 +19,10 @@ services:
       - /opt/catcher/postgresql/data:/var/lib/postgresql/data/
     networks:
       - backend_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
   redis:
     image: redislabs/redistimeseries:latest
@@ -33,6 +37,10 @@ services:
       - /opt/catcher/redis:/opt/catcher/redis
     depends_on:
       - pgdatabase
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
   backend:
     image: jamiegau/catcher_backend:3.0
@@ -65,6 +73,10 @@ services:
     environment:
       - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
       - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
   backendc:
     image: jamiegau/catcher_backend:3.0
@@ -96,6 +108,10 @@ services:
     environment:
       - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
       - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
   # Celery worker
   worker:
@@ -118,6 +134,10 @@ services:
     environment:
       - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
       - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
   worker_mon:
     image: jamiegau/catcher_backend:3.0
@@ -139,6 +159,10 @@ services:
     environment:
       - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
       - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
   # Celery Beat
   beat:
@@ -156,6 +180,10 @@ services:
     environment:
       - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
       - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
   nginx:
     image: jamiegau/catcher_nginx:3.0
@@ -169,6 +197,10 @@ services:
     # this must be set to the exposed IP adress on the projection network.
     extra_hosts:
       - "host.docker.internal:${EXPOSED_IP_PROJECTION_NETWORK}"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
 
   ftpserver:
@@ -188,6 +220,10 @@ services:
       - "host.docker.internal:${EXPOSED_IP_PROJECTION_NETWORK}"
     depends_on:
       - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
   aria2server:
     image: jamiegau/catcher_aria2server:3.0
@@ -204,6 +240,10 @@ services:
       - redis
     extra_hosts:
       - "host.docker.internal:${EXPOSED_IP_PROJECTION_NETWORK}"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
   tp:
     image: jamiegau/catcher_backend:3.0
@@ -215,6 +255,10 @@ services:
       - backend_network
     depends_on:
       - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
       
   samba:
     image: dperson/samba
@@ -229,6 +273,10 @@ services:
       - SHARE=DCPs;/opt/catcher/storage/assetlib/by_type
     volumes:
       - /opt/catcher/storage:/opt/catcher/storage
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
 
 networks:
     backend_network:
