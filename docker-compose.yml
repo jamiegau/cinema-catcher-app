@@ -64,7 +64,7 @@ services:
         #    env_file:
         #      - ./env
     working_dir: /data/backend
-    command: /usr/bin/gunicorn dcinenet_catcher.wsgi:application --bind=0.0.0.0:8000 --timeout 60 --workers 4
+    command: gunicorn dcinenet_catcher.wsgi:application --bind=0.0.0.0:8000 --timeout 60 --workers 4
     volumes:
       - /etc/machine-id:/etc/machine-id
       - /opt/catcher/storage:/opt/catcher/storage
@@ -99,7 +99,7 @@ services:
         #    env_file:
         #      - ./env
     working_dir: /data/backend
-    command: /usr/bin/daphne dcinenet_catcher.asgi:application -b 0.0.0.0 -p 8001
+    command: daphne dcinenet_catcher.asgi:application -b 0.0.0.0 -p 8001
     volumes:
       - /etc/machine-id:/etc/machine-id
       - /opt/catcher/storage:/opt/catcher/storage
