@@ -220,7 +220,8 @@ To do this, you simply need to goto the cinema-catcher-app directory, and as the
 run the following command:
 
 ```
-git pull origin main
+git fetch origin main
+git reset --hard origin/main
 ```
 
 After doing that, I recommend upgrading to the most recent version by running the following
