@@ -220,9 +220,7 @@ To do this, you simply need to goto the cinema-catcher-app directory, and as the
 run the following command:
 
 ```
-docker compose down
-git fetch origin main
-git reset --hard origin/main
+docker compose down && git fetch origin main && git reset --hard origin/main && bash update.sh
 ```
 
 After doing that, I recommend upgrading to the most recent version by running the following
