@@ -1,0 +1,1 @@
+This is where netbird saves its information.

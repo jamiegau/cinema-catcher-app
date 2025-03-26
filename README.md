@@ -105,7 +105,7 @@ digitAll hopes this tool ensures many smaller cinemas can survive and thrive in 
 
 The following equipment are slated for integration into this toolset.
 
-- Cinema-player: Dolby, GDC, Qube and Barco,
+- Cinema-player: Dolby, GDC, Qube and Barco (Barco S4 to be done),
 - Projectors: NEC and Barco are in the works.
 - Sound processors: JSD/QSC, Dolby are in the works.
 - IO-control: RLY-8 and JNior are in the wortks.
@@ -148,83 +148,73 @@ The platform for catcher is based on common open source technologies that cinema
 
 The install path is:  Get suitable hardware, install "minimal" Ubuntu Server LTS, follow these install instructions below.
 
+# Firstly IMPORTANT to current users
+Users who have already installed cinema-catcher-app are highly advised to perform an update to
+the downloaded codebase.  This is because the docker-compose.yml file has changed considerably to
+deal with log file growth.
+
+To do this, you simply need to goto the cinema-catcher-app directory, and as the root user,
+run the following command: 
+```
+git pull origin main
+```
+After doing that, I recommend upgrading to the most recent version by running the following
+command:
+```
+bash update.sh
+```
+This script will stop the application, pull the latest code, run upgrade scripts, and restart
+the application.
+
 # How to install Catcher
 ## Ready your server
 Before you continue, the server needs a number of items.
-- Install your docker-capable server, recommended Ubuntu 22.04 LTS with minimal server install.
+- Install your docker-capable server, recommended Ubuntu 24.04 LTS with minimal server install.
 - Make the storage directory and mount your storage disk onto that directory.
 - Network and IP address configuration.
 
-### Mounting storage disk
+### Mounting storage disk (If using for DCP asset storage)
 You must make the following directories and mount your storage disk onto the directory.
 ```
-$ sudo mkdir /opt/catcher
-$ sudo mkdir /opt/catcher/storage
+sudo mkdir /opt/catcher
+sudo mkdir /opt/catcher/storage
 ```
-This is where some LINUX knowhow comes in handy as the storage disk, be it a Hardware RAID, software RAID under linux, other mounted from a storage server, must be mounted on the `/opt/catcher/storage` directory.  I recomend you google how this is done based on your requirements.
+This is where some LINUX know-how comes in handy as the storage disk, be it a Hardware RAID,
+software RAID under linux (ZFS recommended), or mounted from a storage server, the storage
+disk must be mounted on the
+`/opt/catcher/storage` directory.  I recommend you google how this is done based on your
+requirements.
 
-If you are just taking the simple path and installed the Ubuntu-server onto a large disk, just make the directories.  If nothing is mounted on the `storage` directory, the files will be stored on the '/' or root filesystem same as the opertating system in installed upon.
+If you are just taking the simple path and installed the Ubuntu-server onto a large disk,
+just make the directories.  If nothing is mounted on the `storage` directory, the files
+will be stored on '/' or root filesystem, same as the operating system.
 
 ### Setup your network interfaces
-It is recommended that the server has two physical Network interfaces.  One on the typical Internet connected network, and the second on the Projection network.  Many cinemas keep the Projection network on a physically isiloted network so it cannot reach into the internet.  As the catcher needs to talk to the projection network devices and is also likely to pull content from the internet or send mail reports, it will need two seperate interfaces connections, one for each. NOTE: some smaller cinemas, keep this all on the same physical network.  This is simpler for them, and if it works. It works, and is easier to manage.  But in general, seperate physical networks are recommended.
+It is recommended that the server has two physical Network interfaces.  One on the
+typical Internet connected network, and the second on the Projection/Media network.  Many
+cinemas keep the Projection network on a physically isolated network so it cannot
+reach into the internet.  As the catcher needs to talk to the projection network
+devices and is also likely to pull content from the internet or send mail reports,
+it will need two separate interfaces connections, one for each. NOTE: some smaller
+cinemas, keep this all on the same physical network.  This is simpler for them,
+and if it works. It works, and is easier to manage.  But in general, separate 
+physical networks are recommended.
 
-The projection network requires a STATIC IP address as it needs to be refered to in the `docker-compose.yml` file.
+The projection network requires a STATIC IP address as it needs to be referred 
+to in the `docker-compose.yml` file.
 
 ## Installing the software
-As of Ubuntu 22.04 it is not recommend to use Docker that comes with Ubuntu as it has been converted to a SNAP based install that does not allow suitable permissions for the docker containers to work with the software.
+As of Ubuntu 24.04 it is not recommend to use Docker that comes with Ubuntu as it
+has been converted to a SNAP based install that does not allow suitable permissions
+for the docker containers to work with the software.
 
-It is recommend you follow the docker install from the docker website itself.  Found at https://docs.docker.com/engine/install/ubuntu/  Install docker using the `apt repositor` method.
+It is recommend you follow the docker install from the docker website itself. 
+Found at https://docs.docker.com/engine/install/ubuntu/  Install docker using the `apt repositor` method.
 
-Please read the docker documentation is linked above, however, for an example, see below.
+Please read the docker documentation as linked above and follow its instructions. Once you have 
+completed the install, return to this install documentation and continue.
 
-NOTE: You will be asked for your password whenever you use `sudo`, or **SuperUser DO** which runs the command as the root/super user.
-
-
-```
-jamieg@catcher-dev:~$ sudo apt-get update
-Hit:1 http://au.archive.ubuntu.com/ubuntu jammy InRelease
-.
-.
-.
-Reading package lists... Done
-jamieg@catcher-dev:~$ sudo apt-get install \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release
-Reading package lists... Done
-Building dependency tree... Done
-Reading state information... Done
-lsb-release is already the newest version (11.1.0ubuntu4).
-lsb-release set to manually installed.
-ca-certificates is already the newest version (20211016ubuntu0.22.04.1).
-ca-certificates set to manually installed.
-curl is already the newest version (7.81.0-1ubuntu1.7).
-curl set to manually installed.
-gnupg is already the newest version (2.2.27-3ubuntu2.1).
-gnupg set to manually installed.
-0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
-jamieg@catcher-dev:~$ sudo mkdir -p /etc/apt/keyrings
-jamieg@catcher-dev:~$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-jamieg@catcher-dev:~$ echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-jamieg@catcher-dev:~$ cat /etc/apt/sources.list.d/docker.list
-deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu   jammy stable
-jamieg@catcher-dev:~$ sudo apt-get update
-Hit:1 http://au.archive.ubuntu.com/ubuntu jammy InRelease
-.
-.
-.
-Reading package lists... Done
-jamieg@catcher-dev:~$ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
-.
-.
-.
-jamieg@catcher-dev:~$
-```
-
-You now have the lastes docker installed, and can be checked with the command:
+You now have the lastest docker installed, and can be checked with the command:
 ```
 sudo docker --version
 Docker version 20.10.22, build 3a2c30b
@@ -233,6 +223,8 @@ You should have the above version or greater.
 `docker-compose` is now installed as part of docker and is no longer an extra install requirement.
 
 ### Other required tools
+
+Git is required to download the Repository.  To install it:
 
 ```
 sudo apt install git
@@ -244,7 +236,10 @@ Now lets download the base `docker-compose.yml` file what describes to docker ho
 cd /opt
 sudo git clone https://github.com/jamiegau/cinema-catcher-app.git
 ```
-This will download the example yml config file and other files into a directory called `cinema-catcher-app` into your current directory that should be `/opt`.  In this directory you control the docker containers and bring up the application and all its services.  But before that can occur, you must setup some local variables.
+This will download the `docker-compose.yml` config file and other files into a directory
+called `cinema-catcher-app` into your current directory that should be `/opt`.  In this
+directory you control the docker containers and bring up the application and all its
+services.  But before that can occur, you must setup some local variables.
 
 ## Create the configuration file.
 Create a file called `.env` file is in the directory `/opt/cinema-catcher-app`.
@@ -256,50 +251,66 @@ sudo nano .env
 
 Copy the following into the file:
 ```
-LOCAL_TIMEZONE_NAME=Australia/Brisbane
-CATCHER_HOSTNAME=catcher-location-name
-EXPOSED_IP_PROJECTION_NETWORK=x.x.x.x
+LOCAL_TIMEZONE_NAME=                   # for example: Australia/Brisbane
+CATCHER_HOSTNAME=                      # for example: CHAIN-SITE-catcher
+EXPOSED_IP_PROJECTION_NETWORK=         # for example: you projection netwrok ip, ie: 192.168.1.100
 IN_PRODUCTION=True
 ```
-Update these three variables as described by their names.
-`EXPOSED_IP_PROJECTION_NETWORK` is the static IP address you assigned to the network interface on the projection network.
 
-`IN_PRODUCTION` can be set to False, to enable debug logging in the application containers.  (See the `docker-compose.yml` file for more detail.)
+Update these three variables as described by their names.  PLEASE REMOVE THE COMMENTS `#` 
+after updating with the correct values.
+
+**It is very important you set a unique `CATCHER_HOSTNAME` in the `.env` file.**  It is recommended that
+you use a name like `CHAIN-SITE-catcher`. 
+
+For example `vue-nederland-catcher` (For Chain: Vue. Location: Nederland) or `cc-ararat-catcher`
+(For chain: Centre Cinemas. Location: Ararat).
+
+`EXPOSED_IP_PROJECTION_NETWORK` is the static IP address you assigned to the network interface on
+the projection network.
+
+`IN_PRODUCTION` can be set to False, to enable debug logging in the application containers.
+(See the `docker-compose.yml` file for more detail.)
 
 Set the TIMEZONE_NAME environment variable.  This should be set to, for example
 `Melbourne/Australia` or the suitable name for your location. (see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of names.)
 
-Make sure the following files are executable with this command
+Run the *.sh files by using the `bash` command while as root.
 ```
-sudo chmod 755 local.env.sh TAIL.sh update.sh start.sh
+bash TAIL.sh
+bash update.sh
+bash start.sh
 ```
 
 It is recommended that you start a ROOT bash shell when doing these commands.
 ```
 sudo bash
-root@catcher-dev:/opt/cinema-catcher-app#
+Password: *********
+root@CHAIN-SITE-catcher:/opt/cinema-catcher-app#
 ```
 
-You can see you now have `root` in the prompt and a hash `#` at the end, indicating you are now running as a root user. (Be careful)
+You can see you now have `root` in the prompt and a hash `#` at the end, indicating you are now 
+running as a root user. (Be careful)
 
 ### Download the software
 Once you have created the local config file.  Its time to pull down all the software from the docker-hub.  To do this type:
 ```
 root@catcher-dev:/opt/cinema-catcher-app# docker compose pull
 ```
-This will take some as neat 2GB of applications will be downloaded.  Get a coffee..
+This will take some time as there is nealy 2GB of applications that will be downloaded.  Get a coffee.
 
 Once this has completed, type the next command to initialise the install (ie, the database etc.)
 ```
-root@catcher-dev:/opt/cinema-catcher-app# docker compose run backend python3 ./manage.py migrate
-root@catcher-dev:/opt/cinema-catcher-app# docker compose run backend python3 ./manage.py catcher_setup
+sudo docker compose run backend python3 ./manage.py migrate
+sudo docker compose run backend python3 ./manage.py catcher_setup
 ```
 And finally, start the server.
 ```
-root@catcher-dev:/opt/cinema-catcher-app# docker compose up -d
+sudo docker compose up -d
 ```
-You can now type the IP address of the Catcher Server into a browser and continue with the setup of the software.
-If you reboot the server, the docker service should shutdown and restart the catcher docker containers automatically.
+You can now type the IP address of the Catcher Server into a browser and continue with the setup
+of the software.  If you reboot the server, the docker service should shutdown and restart 
+the docker containers automatically.
 
 ### Default Login
 Once the system is running, you can go to the USER-INTERFACE by using your browser
@@ -313,22 +324,35 @@ Once you login you can change the password and/or create users from
 the **Admin -> Users** menu on the left of the interface.
 
 ### Other useful commands
-```
-root@catcher-dev:/opt/cinema-catcher-app# docker compose ps
-```
-To get the status of the containers.
 
-In the same folder at the config file you will find the command `TAIL.sh` (make sure you `chmod 755 TAIL.sh`, so you can execute it as a command first), use this command to monitor the debug output of all (done supply any docker container name) of a specific container by giving it the container name.  i.e.
+To get the status of the containers.
 ```
-sudo TAIL.sh backend
+sudo docker compose ps
 ```
+
+To tail the logs of the docker containers.
+
+In the same folder at the config file you will find the command `TAIL.sh`, use this command
+to monitor the debug output of services.  It will do all services if you ommit the service name.
+
+To only tail the backend service:
+```
+sudo bash TAIL.sh backend
+```
+
 Shutdown the catcher server.
 ```
 sudo docker-compose down
 ```
-Update the server to latest version of the containers by using the `update.sh` script (make sure you `chmod 755 update.sh`, so you can execute it as a command first).  It will shutdown, pull latest containers, update the database if required,  bring the catcher containers back up and delete any older container file left behind.  All in one command.
+
+Update the server to latest version of the containers by using the `update.sh` script 
+It will shutdown, pull latest containers, update the database if required, 
+bring the catcher containers back up and delete any older container files left behind.
+All in one command.  NOTE: this is a good command to use to see if it frees up disk space.
+The docker config is set to not fill your disk with logs and other files, but it still is
+good practice to give it a clean now and then.  
 ```
-sudo update.sh
+sudo bash update.sh
 ```
 
 # Setting up the Software

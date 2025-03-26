@@ -243,21 +243,6 @@ services:
       driver: "json-file"
       options:
         max-size: "5m"
-
-  tp:
-    image: jamiegau/catcher_backend:3.0
-    hostname: tp
-    restart: always
-    working_dir: /data/backend
-    command: python3 manage.py start_proxy
-    networks:
-      - backend_network
-    depends_on:
-      - redis
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "5m"
       
   samba:
     image: dperson/samba
@@ -272,6 +257,28 @@ services:
       - SHARE=DCPs;/opt/catcher/storage/assetlib/by_type
     volumes:
       - /opt/catcher/storage:/opt/catcher/storage
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+
+  netbird:
+    image: netbirdio/netbird:latest
+    restart: always
+    hostname: netbird
+    network_mode: "host"
+    environment:
+      - NB_SETUP_KEY=5558D99A-DF82-4355-976B-FC5525F90181
+      - NB_MANAGEMENT_URL=https://lighthouse.digitall.net.au:443
+      - NB_ADMIN_URL=https://lighthouse.digitall.net.au:443
+      - NB_LOG_LEVEL=warn
+      - NB_HOSTNAME=${CATCHER_HOSTNAME:?Error CATCHER_HOSTNAME is not set in .env}
+      - NB_ALLOW_SERVER_SSH=true
+      - CATCHER_HOSTNAME=${CATCHER_HOSTNAME}
+    privileged: true
+    volumes:
+      - ./netbird-client-data:/var/lib/netbird
+      - ./netbird-client-data:/etc/netbird
     logging:
       driver: "json-file"
       options:
