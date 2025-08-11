@@ -256,6 +256,10 @@ If you are just taking the simple path and installed the Ubuntu-server onto a la
 just make the directories. If nothing is mounted on the `storage` directory, the files
 will be stored on '/' or root filesystem, same as the operating system.
 
+## Major Upgrade to Barco SOAP API
+
+Catcher had been limited in its compatibilty to Barco due to a SSL limitation in decriptions algorythems used on their player.  With help from Barco, and moving to a newer SOAP library, this is now overcome and KDM management, Auditing and basic monitoring is operational again with Barco equipment if using version 3.5.18 (seen in catcher web interface alson the top) or above.
+
 ### Setup your network interfaces
 
 It is recommended that the server has two physical Network interfaces. One on the
