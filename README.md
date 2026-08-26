@@ -436,7 +436,21 @@ permissions:
 ```bash
 findmnt /opt/catcher/storage
 sudo docker compose exec -T backend ls -ld /opt/catcher/storage
-sudo docker compose exec -T redis ls -ld /opt/catcher/redis
+sudo docker compose exec -T redis ls -ld /data
+```
+
+Redis must be able to write its persistent `/data` mount. If its logs report
+`Failed opening the temp RDB file` or `stop-writes-on-bgsave-error`, repair the
+host directory using the UID and GID from the running image, then verify a
+snapshot:
+
+```bash
+redis_uid="$(sudo docker compose exec -T redis id -u redis)"
+redis_gid="$(sudo docker compose exec -T redis id -g redis)"
+sudo chown -R "${redis_uid}:${redis_gid}" /opt/catcher/redis
+sudo docker compose exec -T redis redis-cli BGSAVE
+sudo docker compose exec -T redis redis-cli INFO persistence |
+  grep rdb_last_bgsave_status
 ```
 
 ## Documentation and support

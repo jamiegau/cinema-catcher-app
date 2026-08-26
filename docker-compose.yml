@@ -28,13 +28,13 @@ services:
     image: redis:8-trixie
     hostname: redis
     restart: always
-    command: ["/usr/local/bin/redis-server", "--dir", "/opt/catcher/redis/.", "--dbfilename", "redis_dump.rdb", "--save", "300", "100"]
+    command: ["redis-server", "--dir", "/data", "--dbfilename", "redis_dump.rdb", "--save", "300", "100"]
     expose:
       - "6379"
     networks:
       - backend_network
     volumes:
-      - /opt/catcher/redis:/opt/catcher/redis
+      - /opt/catcher/redis:/data
     depends_on:
       - pgdatabase
     logging:
