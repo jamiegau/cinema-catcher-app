@@ -1,465 +1,454 @@
-# Catcher server, free productivity tools for cinema exhibitors
+# Cinema Catcher 4
 
-![Screen shot of Player-Status screen](images/catcher-screenshot-PlayerStatus.png?raw=true "Screen shot of Player-Status Screen")
+Free cinema operations, content management, AutoKDM, monitoring, audit, and
+theatre-management tools for exhibitors.
 
-## What is a catcher server?
+![Cinema Catcher 4 dashboard](images/v4/dashboard.png)
 
-As cinemas transition to an ever more IT-centric way of operation, many aspects of running a cinema can be automated.
-Catcher is a free-to-use tool that automates many aspects of running a cinema reducing running costs.
+> **Upgrading an existing Catcher 3 installation?** Do not replace the Compose
+> file or run `update.sh` yet. Catcher 4 moves from PostgreSQL 13 to PostgreSQL
+> 18 and requires a controlled database migration. Follow
+> [Upgrading from Catcher 3](UPGRADING_FROM_V3.md).
 
-This tool is focused on smaller cinema exhibitors that may not be using a TMS due to costs. For larger Exhibitors or
-chains who want a free backup solution, independent of the TMS. There are many features in the software that do not
-exist in TMS vendor software. This is software written by a cinema owner and the problems they have, and not
-vendor-driven software with a set agenda.
+The previous installation guide is retained as
+[README_V3.md](README_V3.md) for historical reference. It must not be used for
+a new Catcher 4 installation.
 
-**Documentation on suitable equipment and the installation process is below.**
+## What Cinema Catcher does
 
-## Current Status
+Cinema Catcher is a site-level cinema server created by an exhibitor to reduce
+the repetitive technical work involved in operating digital cinemas. Features
+can be enabled independently: a site may use only the LMS, only AutoKDM, only
+player monitoring, or the complete toolset.
 
-This tool is still under development and should be considered Beta Status. Although some aspects of the tools are
-finished, major changes are in the works to implement some of the new advanced features. Many tools in this software
-should be considered projection ready. However, with the numerous combinations of software possible, it would be great
-if some advanced users could try out the development versions and contribute to bugs and potential improvements and
-suggestions for future developments.
+The project is particularly useful to independent and regional cinemas that do
+not have a full commercial TMS. It can also operate beside an existing TMS as
+an independent content library, KDM safety net, audit system, or monitoring
+tool.
 
-## Ready for Production
+Cinema Catcher is actively developed. Validate workflows against the player,
+projector, POS, and network versions used at each site before relying on an
+automation function unattended.
 
-The following features are ready for production. The goal of the system is a set-and-forget solution that should only
-need updating if a problem or change in equipment occurs. Its focus is to reduce labor in dealing with technical aspects
-of running a cinema as much as possible. The system operates completely independently of any TMS, and as such can be
-used to back up any TMS functions or operate to address the specific operation functions it automates. It is designed to
-be used on a site-by-site basis, or as a global tool looking after numerous sites and hundreds of screens.
+## What is new in Catcher 4
 
-The features of the catcher application are also independent and the user can use one or more of the tools it comes with
-depending on their needs. It is not all or none. Its ala carte. Only utilise the tools that best suit you.
+- A new Svelte interface is now the primary interface. It is responsive, uses
+  the full browser width, defaults to the Midnight Slate dark theme, and has a
+  light/dark switch beside sign-out.
+- Real-time backend-process reporting shows queued work, stages, progress, and
+  failures directly in the top bar.
+- Player Status has denser fixed-width screen cards, multi-site grouping,
+  direct IMS-control links, poster support, reconnect/backoff handling, and a
+  dedicated polling queue.
+- AutoKDM has more resilient IMAP processing, persistent message UID memory,
+  configurable email-age limits and deletion, expired-KDM rejection, clearer
+  target/asset reporting, and a dedicated eight-process delivery queue.
+- Media Assets now includes deeper CPL structure and QC information, previews,
+  video bitrate, audio waveform/loudness data, film mapping, player ingest, and
+  orphaned/broken asset management.
+- Ingest has explicit source/device/queue views, clearer failures, passive
+  validation, XML cleanup before ClairMeta, and improved duplicate handling.
+- Network bandwidth collection has a dedicated monitor process with retained
+  raw and roll-up history.
+- Device Discovery and Playout Audit have been rebuilt in the new interface.
+- A new TMS workspace adds films, Veezi/manual scheduling, reusable template
+  SPLs, dynamic PreShow rules, IMS macro validation, and controlled programming.
+- PostgreSQL 18, Redis 8, Debian Trixie application images, Django 6, and
+  isolated Celery queues form the updated service platform.
 
-| Feature                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Status                                                                          |
-|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| LMS (Library Management System) | This feature includes the ability to ingest content from  physical disks and USBs or from FTP servers, local or remote.  Devices can be set to periodically scan and ingest any DCP found.  ClairMeta is then used to Quality-Check the DCP.  Finally, Email reports can be generated automatically. Oldest Assets are automatically deleted as needed. Assets can be marked to never delete. As a LMS, all content is then made available via FTP server, for Screen-DCI-Player to ingest any content in the Library. <br/><br/>New Feture, FTP upload DCP into LMS capability<br/><br/>Online Video Overview: https://youtu.be/G0GvkAnYvt0                                                                                                                                                                                                                                           | Production                                                                      |
-| Status Monitor                  | This tool allows you to monitor all screen configured into the system.  Ths can be used to monitor local or numerous remote screens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Production limited functionality                                                | 
-| Status Monitor device Control   | Under development and extending the status Monitor, you can take control of any DCI-Player, Sound-processor, Projector, IO-Device directly to override or manually control a screen if required                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Development                                                                     |
-| Schedule Monitor                | This screen monitors screens on a Schedule level showing a timeline for each screen and what sessions are playing at what time and when they finish/start                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Not Started                                                                     |
-| AutoKDM                         | Is a tool that can monitor an IMAP access to an Email account.  It will transparently read your Email, and only download Emails that contain KDMs, mark them as read, or even move them into another folder (Only if a KDM is discovered).  It is best to have a dedicated Email for KDMs however, the tool can deal with utilising an Email that is also used by humans for general Email activity.  The tool will download all KDMs into a data base for checking, tracking and finally ingesting into the target player.  Based on configured target players, AutoKDM will ingest KDMs automatically to all target screens automatically.  Reports on activity can be emailed to the Admin if required. The system incorporates KDM INFO Emails for users can easily track back to the KDM creator if problems occur. <br/><br/>Online Video Overview: https://youtu.be/zjN9h2T82js | Production                                                                      |
-| KDM Alert                       | This tool generates daily reports sent to the Staff that inform of any scheduled session that do not yet have a KDM to allow them to play.  This tool ensures a cinema knowns days in advance if a KDM has failed to arrive, giving them time to react to the error. <br/><br/>Online Video Overview: https://youtu.be/1WV9WR4vVxM                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Production                                                                      |
-| Auto Discovery                  | Based on the open source tool cinema-nmap-scripts (https://github.com/jamiegau/cinema-nmap-scripts).  It will automatically detect well known devices on the Projection network, pulling Version numbers when possible.  The tool can then be used to audit your projection equipment and can automatically detect the change in any version of DCI-equipment sending/Emailing a Report when changes occur.  Plans to incorporate this with an FLM tool has been discussed.) <br/><br/>Tool Overview: https://youtu.be/7JnhEDdOobo <br/>NMAP tool: https://youtu.be/1ZUCCIH4OYA                                                                                                                                                                                                                                                                                                        | Production, but limited by devices supported in the cinema-nmap-scripts project |
-| Player Audit                    | This tool periodically downloads playout logs from the DCI-Players.  This allows the creation of reports to analyise the activity on a player.  This can be used to send playout reports for Advertisers or for engineers to get a detailed indication of the activity on a player. For example, you can detect if shows are playing outside of open hours, or if manual control is occurring and how often. This can be done by either an Email report containing a CSV-file, or automatically sending playout reports to a specified WEB End-point (Internet Web Address) that the data is pushed to periodically. <br/><br/> Tool Overview: https://youtu.be/7ZEj2FhvOis                                                                                                                                                                                                            | Production                                                                      |
+## Interface overview
 
-## Feature development status
+### Player and site operations
 
-|                       | Dolby   | GDC     | Qube    | Barco   |
-|-----------------------|---------|---------|---------|---------|
-| Player Status Monitor | Done    | Done    | Started | Started |
-| Player Status Control | Partial | Started | Partial | Future  |
+![Cinema Catcher 4 Player Status](images/v4/player-status.png)
 
-|                                | Status | Vendors   |
-|--------------------------------|--------|-----------|
-| Player Status Sound-Processors | Future | JSD100/60 |
+Player Status groups screens by cinema, shows the active SPL/CPL, progress,
+automation state, storage and ingest activity, and provides player controls
+where supported. A screen number links directly to that IMS control interface.
+Offline players are backed off so they do not consume all polling capacity.
 
-|                         | Barco  | NEC    | Christie         |
-|-------------------------|--------|--------|------------------|
-| Player Status Projector | Future | Future | long term Future |
+### Content library and QC
 
-|                      | JNIOR  | RLY8   | KMTronic |
-|----------------------|--------|--------|----------|
-| Player Status IO Box | Futrue | Future | Future   |
+![Cinema Catcher 4 Media Assets](images/v4/media-assets.png)
 
-|                         | Dolby  | GDC    | Qube   | Barco  |
-|-------------------------|--------|--------|--------|--------|
-| Schedule Status Monitor | Future | Future | Future | Future |
+The LMS ingests DCPs from attached media, network/FTP sources, and uploaded
+content. Assets are checked with ClairMeta and presented as searchable DCP/CPL
+records. Operators can protect assets from automatic deletion, inspect detailed
+metadata and QC products, map assets to films, and send content to players.
 
-| Media Asset Solution Features  | Progress |
-|--------------------------------|----------|
-| Ingest Local Devices           | Done     |
-| Ingest from FileSystem         | Done     |
-| Ingest from FTP share          | Done     |
-| Auto Ingest on discovery       | Done     |
-| Auto Quality Cheap (Clairmeta) | Done     |
-| Auto Delete Older content      | Done     |
-| Protect from Auto Delete       | Done     |
-| FTP access to all Ingested     | Done     |
+### AutoKDM
 
-| AutoKDM and Alert-KDM Features           | Progress (Dolby, GDC, Qube, Barco)      |
-|------------------------------------------|-----------------------------------------|
-| Creation of Screen data interface        | Done                                    |
-| Auto pull Cert from Player               | Done                                    |
-| Creation screen to input IMAP sources    | Done                                    |
-| Auto download Emails from IMAP source    | Done                                    |
-| Auto scan and push found KDMS            | Done                                    |
-| Real time email endpoint ingest          | Done                                    |
-| Ingest KDM into Players                  | Done                                    |
-| Real time Email to KDM ingest            | Possible but needs extra infrastructure |
-| Schedule inspect                         | Done                                    |
-| Schedule to Session/CPL matching         | Done                                    |
-| Schedule/Session/CPL to KDM matching     | Done                                    |
-| Report generation and Email              | Done                                    |
-| Report setup, history and manual control | Done                                    |
+![Cinema Catcher 4 AutoKDM](images/v4/autokdm.png)
 
-# Documentation
+AutoKDM collects KDMs from IMAP sources or a direct RFC822 email endpoint,
+matches certificate targets, filters unusable or expired keys, and queues
+delivery without allowing an offline player to block other screens. KDM Alerts
+compare scheduled content, the asset inventory, player content, and KDM
+validity, then produce advance warning reports.
 
-Detailed documentation is built into the tool and typically can be found in the menus section of the toolset your are
-using.
+### Theatre Management System
 
-It is recommended you create an account on GitHub and then monitor this project for updates as so you are informed when
-new features are made available.  
-Plus to report bugs or suggestions, please use your Github account to leave reports on the "Issues" page for this GitHub
-project.
+![Cinema Catcher 4 TMS](images/v4/tms.png)
 
-# "Transfer" application
+The TMS section is the newest major area. It supports manual or Veezi-derived
+films and sessions, DCP-to-film mapping, weekly screen timelines, template SPLs,
+dynamic PreShow buckets, 2D/3D playlist selection, and IMS programming checks.
+Treat TMS programming as a supervised workflow until it has been validated with
+the exact IMS software used at the site.
 
-This tool is a part of a content distribution solutions that was prototyped into the catcher applications. It is part of
-the https://admin.d-cine.net online toolset targeting exhibitors and distributors. Based on automated booking system (
-see overview: https://youtu.be/a8fPI5D-gbU), the solution will route content automatically to exhibition locations.
+## Feature map
 
-It also performs detailed online QC of DCPs. (Biterate, AutoLevels, Clairmeta certification, online preview.)
+| Area | Main capabilities |
+| --- | --- |
+| Dashboard and Status | Storage, recent assets, deletion queue, service status, network utilisation and retained bandwidth graphs |
+| LMS / Media Assets | DCP ingest, ClairMeta QC, searchable DCP/CPL catalogue, asset protection and cleanup, FTP/Samba access, metadata and preview products, film mapping and player ingest |
+| Ingest | Local devices, filesystem/network/FTP sources, cached scans, queues, duplicate detection, automatic source polling and actionable failures |
+| AutoKDM | IMAP and piped email ingest, email-age policies, KDM validity filtering, certificate matching, player/FTP delivery, retry queues, history and reports |
+| KDM Alerts | Schedule-to-CPL-to-KDM checks, player asset checks, configurable recipients and retained report history |
+| Player Status | Multi-site monitoring, schedule state, SPL/CPL progress, storage, ingest state, controls and direct IMS links |
+| Playout Audit | Player log collection, searchable records, scheduled reports, CSV/email/API output and retention controls |
+| Device Discovery | Passive network discovery, version inventory, comparison, targeted scans and change reports |
+| TMS | Films, DCP mapping, Veezi/manual schedules, weekly programming, template SPLs, dynamic PreShow and IMS macro validation |
+| Administration | Users, global configuration, email, TMS/FTP settings, debug tasks, background-process history and dark/light theme |
 
-This is a proof of concept toolset and has been mostly completed and in production for a small cinema chain. However, it
-can be expanded to small regions. Contact the developer if interested in leveraging this implementation for DCP
-distribution solutions for cinema chains, advertising agents or a smaller community of DCP content distribution (i.e.
-small country adoptions etc.) Developed to use open standard protocols for security, speed and ease of scaling up as
-needed. Contact The developer if you are interested in investigating this tool set.
+Player integration exists for Dolby/Doremi, GDC, Qube, and Barco families, but
+individual capabilities vary by vendor, model, and software release. Always
+test certificate retrieval, status, audit, KDM ingest, content ingest, control,
+and TMS programming separately for each deployed player version.
 
-# Who made the product and why?
+## Architecture
 
-The Catcher application was made by a small Australia company (https://www.digitall.net.au) that develops IP for
-operating autonomous cinema locations. Due to the COVID crisis and the change in industry norms, such as "Streaming
-First" initiatives by the major exhibitors and a reduction in windows from 90 to 45 days, the result will be a reduction
-in attendance for cinemas as consumers change behaviour and take advantage of these offerings. The objective for making
-part of the IP available under a free to use model is to ensure the culture of cinemas can metabolize these changes. For
-example, if a small cinema loses 10-20% of attendance, but also drops its running costs by 10-20% by becoming more
-productive in operating the cinema, there is an overall 0 net loss. Ensuring cinemas are more likely to survive the
-changes occuring.
+The installation is a Docker Compose application. Persistent cinema data lives
+outside the containers below `/opt/catcher`.
 
-digitAll hopes this tool ensures many smaller cinemas can survive and thrive in these difficult times.
+| Service | Purpose |
+| --- | --- |
+| `pgdatabase` | PostgreSQL 18 application database |
+| `redis` | Celery broker, real-time state, locks and caches |
+| `backend` | Django API and application services through Gunicorn |
+| `backendc` | Daphne ASGI/WebSocket service |
+| `worker` | General background tasks |
+| `worker_mon` | Isolated player-status polling queue |
+| `worker_kdm` | Isolated KDM delivery queue, default concurrency 8 |
+| `beat` | Database-backed periodic scheduler |
+| `network-monitor` | Host interface counters and bandwidth roll-ups |
+| `nginx` | Web interface and reverse proxy |
+| `ftpserver` | Player-facing and LMS FTP service |
+| `aria2server` | Managed content transfers |
+| `samba` | Readable DCP library share |
+| `netbird` | Optional remote access profile; disabled by default |
 
-# Supported Cinema Equipment
+## Requirements
 
-The following equipment are slated for integration into this toolset.
+### Recommended server
 
-- Cinema-player: Dolby, GDC, Qube and Barco (Barco S4 to be done),
-- Projectors: NEC and Barco are in the works.
-- Sound processors: JSD/QSC, Dolby are in the works.
-- IO-control: RLY-8 and JNior are in the wortks.
+- Ubuntu Server 24.04 LTS or later, minimal installation.
+- 64-bit x86 processor with at least 4 physical cores; 8 or more threads are
+  recommended for a multi-screen site.
+- 8 GB RAM minimum; 16 GB or more is recommended when using LMS QC, TMS,
+  multiple players, or a desktop environment.
+- 100 GB of free system storage for the operating system, containers, database,
+  temporary work and upgrades. A 256–500 GB SSD is a practical system disk.
+- Separate high-capacity storage mounted at `/opt/catcher/storage` when using
+  the LMS. Use redundant storage or a reliable NAS for production content.
+- Two network interfaces are recommended: one for the business/Internet network
+  and one with a static address on the isolated projection network.
 
-This equipment supported is limited to that of which the developers have access to. If you would like your specific
-equipment supported, please contact the developer to discuss. Typically access to the equipment will be needed. Remote
-access is generally all that is needed.
+Do not allow the PostgreSQL data, Redis data, or the DCP library to fill their
+filesystems. Database upgrades temporarily require room for the old cluster,
+the new cluster, and a logical backup at the same time.
 
-# Reporting bugs and errors
+### Docker
 
-Please utilise the github page and its issue tracker to report issues you may find.
+Install Docker Engine and the Compose plugin from Docker's official Ubuntu APT
+repository:
 
-# System Requirements
+<https://docs.docker.com/engine/install/ubuntu/>
 
-The recommended hardware and software requirements for Catcher are as follows.
+Verify the result:
 
-## Hardware
-
-Catcher is a server applications that performs many processes simultaneously and as such needs a modern computer that
-runs Ubuntu-server (LINUX). A CPU with 4+ cores with Hyperthreading is recommended. 8Gig of Ram or better. The computer
-can have the GUI activated but it is recommended that **NO** GUI is used. A dedicated computer/server is recommended.
-The user accesses the system via a Web browser and so can be used from any computer terminal with a web browser. If GUI
-is to be used 16 gig ram is recommended.
-
-If using the LMS feature the system will be storing a large amount of data. The server needs to either have a large
-amount of disk, or be in a position to mount a large amount of disk from a storage server. I recommend the following
-when it comes to disks for the system.
-
-- A 256-500 gig SSD system disk. This is the target for the operating system. SSD are very reliable, and having a RAID
-  is not so important these days. However, over provision the disk ensures it will last a very long time due to how SSDs
-  work and age. (500gig), Mirror/RAID of the system disk is also nice to have.
-- 3 or more storage disks, 4gig or better. Really depends on how much data you want to store. 3 or more as so they can
-  be RAIDed together using your prefered RAID solution. (I recommend utilising ZFS, or an external NAS system such as
-  TrueNAS)
-
-IF you just want to get started, I recommend utilising a single 10gig disk and install the operating
-system on that disk, and use its extra space for storage. This avoids the need to implement RAID, however,
-may be quite slow at some processes due to the lack of IO of a single disk.
-
-## Software
-
-The application is based on **docker** that containerised the application and all the services it needs.
-Due to this, you can typically run the application on any **docker** capable server or instance, however,
-the ability to ingest PHYSICAL disks and USBs is based on ubuntu server. Ubuntu Server 24.04 LTS is the
-target operating system to run the catcher application. However, there is no reason you could not run
-it virtualized and use a satellite PC that ftp/exports the mounted CRU-Disks/USB-sticks for ingesting.
-
-**The installation process has gone though a significant update due to Ubuntu's implementation change for
-docker from LTS 24.04**
-
-<br/>Typically, when installing a system to run catcher on, you install be base ubuntu-server 24.04 LTS onto
-a computer. Install docker-compose, then follow the installation procedure below.
-
-## Who is expected to install this for cinema owners?
-
-This is a difficult question. Cinema owners are businessmen and not IT professionals. However, I know
-a lot of cinema owners who learn the toolset of running a small cinema, such as minimal maintenance of
-projectors etc, as to keep costs down. Or utilise local IT skills (local computer support companies)
-The same approach can be taken here.
-
-Integrators and support agents that service cinemas are also more inclined to offer expensive tools
-that come with 25% yearly maintenance costs they prefer to push as a source of income and stickiness
-to the client. Many smaller cinemas cannot afford this and I would recommend cinema owners encourage
-agents to be more ambidextrous and embrace certain free tools when suitable. Charging for labour
-only when needed.
-
-The platform for catcher is based on common open source technologies that cinemas should be able to
-source reasonable local know how to implement. The local IT shop, or university student level is
-the target level of expertise. I know many cinema owners that would be able to figure this out
-themselves and enjoy the challenge of doing so.
-
-The install path is:  Get suitable hardware, install "minimal" Ubuntu Server LTS, follow these
-install instructions below.
-
-# Firstly IMPORTANT to current users
-
-Users who have already installed cinema-catcher-app are highly advised to perform an update to
-the downloaded codebase. This is because the docker-compose.yml file has changed considerably to
-deal with log file growth.
-
-To do this, you simply need to goto the cinema-catcher-app directory, and as the root user,
-run the following command:
-
-```
-docker compose down && git fetch origin main && git reset --hard origin/main && bash update.sh
+```bash
+sudo docker version
+sudo docker compose version
 ```
 
-The  `bash update.sh` script onh the end of this command will
-stop the application, pull the latest code, run upgrade scripts, restart
-the application and finally clean up any orphaned docker files.
+The legacy Python command `docker-compose` is not used. Commands in this guide
+use `docker compose`.
 
-# How to install Catcher
+## Fresh Catcher 4 installation
 
-## Ready your server
+These steps are for a new server with no Catcher 3 database. Existing v3 sites
+must use [UPGRADING_FROM_V3.md](UPGRADING_FROM_V3.md).
 
-Before you continue, the server needs a number of items.
+### 1. Install supporting packages
 
-- Install your docker-capable server, recommended Ubuntu 24.04 LTS with minimal server install.
-- Make the storage directory and mount your storage disk onto that directory.
-- Network and IP address configuration.
-
-### Mounting storage disk (If using for DCP asset storage)
-
-You must make the following directories and mount your storage disk onto the directory.
-
-```
-sudo mkdir /opt/catcher
-sudo mkdir /opt/catcher/storage
+```bash
+sudo apt update
+sudo apt install -y git ca-certificates curl
 ```
 
-This is where some LINUX know-how comes in handy as the storage disk, be it a Hardware RAID,
-software RAID under linux (ZFS recommended), or mounted from a storage server, the storage
-disk must be mounted on the
-`/opt/catcher/storage` directory. I recommend you google how this is done based on your
-requirements.
+### 2. Prepare persistent directories
 
-If you are just taking the simple path and installed the Ubuntu-server onto a large disk,
-just make the directories. If nothing is mounted on the `storage` directory, the files
-will be stored on '/' or root filesystem, same as the operating system.
+```bash
+sudo mkdir -p \
+  /opt/catcher/storage \
+  /opt/catcher/postgresql/18 \
+  /opt/catcher/redis \
+  /opt/catcher/ftpserver \
+  /opt/catcher/aria2server \
+  /opt/dcinenet/storage
 
-## Major Upgrade to Barco SOAP API
-
-Catcher had been limited in its compatibilty to Barco due to a SSL limitation in decriptions algorythems used on their player.  With help from Barco, and moving to a newer SOAP library, this is now overcome and KDM management, Auditing and basic monitoring is operational again with Barco equipment if using version 3.5.18 (seen in catcher web interface alson the top) or above.
-
-### Setup your network interfaces
-
-It is recommended that the server has two physical Network interfaces. One on the
-typical Internet connected network, and the second on the Projection/Media network. Many
-cinemas keep the Projection network on a physically isolated network so it cannot
-reach into the internet. As the catcher needs to talk to the projection network
-devices and is also likely to pull content from the internet or send mail reports,
-it will need two separate interfaces connections, one for each. NOTE: some smaller
-cinemas, keep this all on the same physical network. This is simpler for them,
-and if it works. It works, and is easier to manage. But in general, separate
-physical networks are recommended.
-
-The projection network requires a STATIC IP address as it needs to be referred
-to in the `docker-compose.yml` file.
-
-## Installing the software
-
-As of Ubuntu 24.04 it is not recommend to use Docker that comes with Ubuntu as it
-has been converted to a SNAP based install that does not allow suitable permissions
-for the docker containers to work with the software.
-
-It is recommend you follow the docker install from the docker website itself.
-Found at https://docs.docker.com/engine/install/ubuntu/  Install docker using the `apt repositor` method.
-
-Please read the docker documentation as linked above and follow its instructions. Once you have
-completed the install, return to this install documentation and continue.
-
-You now have the lastest docker installed, and can be checked with the command:
-
-```
-sudo docker --version
-Docker version 20.10.22, build 3a2c30b
+sudo chmod 755 /opt/catcher/postgresql/18
 ```
 
-You should have the above version or greater.
-`docker-compose` is now installed as part of docker and is no longer an extra install requirement.
+Mount the content filesystem or NAS at `/opt/catcher/storage` before starting
+Catcher. Confirm it is the intended filesystem:
 
-### Other required tools
-
-Git is required to download the Repository. To install it:
-
-```
-sudo apt install git
+```bash
+findmnt /opt/catcher/storage || df -h /opt/catcher/storage
 ```
 
-Now lets download the base `docker-compose.yml` file what describes to docker how to download and run the software. We
-do this by cloning the files down from Github.
+### 3. Download the installer
 
-```
+```bash
 cd /opt
 sudo git clone https://github.com/jamiegau/cinema-catcher-app.git
-```
-
-This will download the `docker-compose.yml` config file and other files into a directory
-called `cinema-catcher-app` into your current directory that should be `/opt`. In this
-directory you control the docker containers and bring up the application and all its
-services. But before that can occur, you must setup some local variables.
-
-## Create the configuration file.
-
-Create a file called `.env` file is in the directory `/opt/cinema-catcher-app`.
-
-```
 cd /opt/cinema-catcher-app
+```
+
+### 4. Configure the site
+
+Create `.env` from the supplied example:
+
+```bash
+sudo cp .env.example .env
 sudo nano .env
 ```
 
-`nano` is a basic text editor, but `vi` or whatever text editor you are comfortable with can be used.
+Set:
 
-Copy the following into the file:
+- `LOCAL_TIMEZONE_NAME` to an IANA timezone such as `Australia/Melbourne`;
+- `CATCHER_HOSTNAME` to a unique name such as `chain-site-catcher`;
+- `EXPOSED_IP_PROJECTION_NETWORK` to this server's static projection-network
+  address; and
+- `IN_PRODUCTION=True` for normal operation.
 
-```
-LOCAL_TIMEZONE_NAME=                   # for example: Australia/Brisbane
-CATCHER_HOSTNAME=                      # for example: CHAIN-SITE-catcher
-EXPOSED_IP_PROJECTION_NETWORK=         # for example: you projection netwrok ip, ie: 192.168.1.100
-IN_PRODUCTION=True
-```
+Review `database.env` before first startup. It contains the PostgreSQL database,
+user and password used internally by Catcher. A new installation may replace
+the supplied password before PostgreSQL is initialised. Do not change these
+values later without also migrating the database credentials.
 
-Update these three variables as described by their names. PLEASE REMOVE THE COMMENTS `#`
-after updating with the correct values.
+NetBird is optional and is not started by the default profile. To use it, set
+`NB_SETUP_KEY` in `.env`, review the NetBird URLs in `docker-compose.yml`, then
+start the `netbird` profile explicitly.
 
-**It is very important you set a unique `CATCHER_HOSTNAME` in the `.env` file.**  It is recommended that
-you use a name like `CHAIN-SITE-catcher`.
+Validate the final Compose configuration:
 
-For example `vue-nederland-catcher` (For Chain: Vue. Location: Nederland) or `cc-ararat-catcher`
-(For chain: Centre Cinemas. Location: Ararat).
-
-`EXPOSED_IP_PROJECTION_NETWORK` is the static IP address you assigned to the network interface on
-the projection network.
-
-`IN_PRODUCTION` can be set to False, to enable debug logging in the application containers.
-(See the `docker-compose.yml` file for more detail.)
-
-Set the TIMEZONE_NAME environment variable. This should be set to, for example
-`Melbourne/Australia` or the suitable name for your location. (
-see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for a list of names.)
-
-Run the *.sh files by using the `bash` command while as root.
-
-```
-bash TAIL.sh
-bash update.sh
-bash start.sh
+```bash
+sudo docker compose config --quiet
 ```
 
-It is recommended that you start a ROOT bash shell when doing these commands.
+### 5. Pull images and initialise Catcher
 
-```
-sudo bash
-Password: *********
-root@CHAIN-SITE-catcher:/opt/cinema-catcher-app#
-```
+```bash
+sudo docker compose pull
+sudo docker compose up -d pgdatabase redis
 
-You can see you now have `root` in the prompt and a hash `#` at the end, indicating you are now
-running as a root user. (Be careful)
+sudo docker compose run --rm backend python3 ./manage.py migrate
+sudo docker compose run --rm backend python3 ./manage.py migrate --check
+sudo docker compose run --rm backend python3 ./manage.py check
+sudo docker compose run --rm backend python3 ./manage.py catcher_setup
 
-### Download the software
-
-Once you have created the local config file. Its time to pull down all the software from the docker-hub. To do this
-type:
-
-```
-root@catcher-dev:/opt/cinema-catcher-app# docker compose pull
-```
-
-This will take some time as there is nealy 2GB of applications that will be downloaded. Get a coffee.
-
-Once this has completed, type the next command to initialise the install (ie, the database etc.)
-
-```
-sudo docker compose run backend python3 ./manage.py migrate
-sudo docker compose run backend python3 ./manage.py catcher_setup
-```
-
-And finally, start the server.
-
-```
 sudo docker compose up -d
+sudo docker compose ps --all
 ```
 
-You can now type the IP address of the Catcher Server into a browser and continue with the setup
-of the software. If you reboot the server, the docker service should shutdown and restart
-the docker containers automatically.
+For optional NetBird access:
 
-### Default Login
-
-Once the system is running, you can go to the USER-INTERFACE by using your browser
-and typing the IP address of the server you installed the cinema-catcher-app on to.
-This will brig up a LOGIN-PROMPT. The default username and password is:
-
+```bash
+sudo docker compose --profile netbird up -d
 ```
+
+### 6. Sign in and secure the installation
+
+Open `http://<catcher-server-address>/` in a current browser.
+
+The initial account created by `catcher_setup` is normally:
+
+```text
 Username: admin
 Password: admin
 ```
 
-Once you login you can change the password and/or create users from
-the **Admin -> Users** menu on the left of the interface.
+Change this password immediately under **Admin → Users**. Create named accounts
+for operators and administrators rather than sharing the initial account.
 
-### Other useful commands
+### 7. Initial application setup
 
-To get the status of the containers.
+Work through the following areas in order:
 
-```
-sudo docker compose ps
-```
+1. **Admin → Configuration** — site identity, storage, email, FTP/TMS and global
+   task settings.
+2. **AutoKDM → Targets** — each screen's player address, vendor, credentials,
+   serial/certificate, enabled functions and screen number.
+3. **Content → Ingest** — ingest devices and network sources.
+4. **AutoKDM → Configuration and KDM Sources** — only if AutoKDM will be used.
+5. **Operations → Device Discovery** — define passive/targeted discovery ranges.
+6. **Operations → Player Status** — confirm every enabled player reports without
+   blocking healthy screens.
+7. **TMS → Configuration** — only after player and content mappings are correct.
 
-To tail the logs of the docker containers.
+Detailed operator help is available from **Manuals and Support** inside Catcher.
 
-In the same folder at the config file you will find the command `TAIL.sh`, use this command
-to monitor the debug output of services. It will do all services if you ommit the service name.
+## Updating an existing Catcher 4 installation
 
-To only tail the backend service:
+Create a database backup first, then run:
 
-```
-sudo bash TAIL.sh backend
-```
-
-Shutdown the catcher server.
-
-```
-sudo docker-compose down
-```
-
-Update the server to latest version of the containers by using the `update.sh` script
-It will shutdown, pull latest containers, update the database if required,
-bring the catcher containers back up and delete any older container files left behind.
-All in one command. NOTE: this is a good command to use to see if it frees up disk space.
-The docker config is set to not fill your disk with logs and other files, but it still is
-good practice to give it a clean now and then.
-
-```
-sudo bash update.sh
+```bash
+cd /opt/cinema-catcher-app
+sudo git pull --ff-only
+sudo ./update.sh
 ```
 
-# Setting up the Software
+`update.sh` refuses to run when it detects the normal Catcher 3/PostgreSQL 13
+data path. For v4 it pulls images, stops database-writing application services,
+applies and checks migrations, runs Catcher setup, restarts the stack, and
+removes only dangling images. It does not prune persistent volumes or remove
+rollback images.
 
-In the near future a Video tutorial will be created.
-For not, please refer to these other Manuals
+## Backups
 
-General Catcher Manual [Click to Read](Manual.md)
+Back up both the database and persistent service data. The DCP library may be
+protected by the storage system's own snapshots, but the PostgreSQL database is
+still required to preserve the catalogue and configuration.
 
-AutoKDM Manual [Click to Read](Manual_AutoKDM.md), Note, a more complete manual is written into the application in the
-menu system.
+Example PostgreSQL 18 backup:
+
+```bash
+cd /opt/cinema-catcher-app
+set -a
+. ./database.env
+set +a
+
+backup_dir="/opt/catcher/backups/$(date +%Y%m%d-%H%M%S)"
+sudo mkdir -p "$backup_dir"
+sudo chmod 700 "$backup_dir"
+
+sudo docker compose exec -T pgdatabase \
+  pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc |
+  sudo tee "$backup_dir/catcher-postgres18.dump" >/dev/null
+sudo sha256sum "$backup_dir/catcher-postgres18.dump" |
+  sudo tee "$backup_dir/catcher-postgres18.dump.sha256"
+sudo sha256sum -c "$backup_dir/catcher-postgres18.dump.sha256"
+```
+
+Also back up `.env`, `database.env`, `docker-compose.yml`,
+`/opt/catcher/redis`, `/opt/catcher/ftpserver`, and
+`/opt/catcher/aria2server`. Restrict backup access because configuration files
+contain operational credentials.
+
+## Useful commands
+
+```bash
+cd /opt/cinema-catcher-app
+
+# Container state
+sudo docker compose ps --all
+
+# Start or reconcile the complete stack
+sudo ./start.sh
+
+# Follow all logs, or one service
+sudo ./TAIL.sh
+sudo ./TAIL.sh backend
+sudo ./TAIL.sh worker_kdm
+
+# Check application and migrations
+sudo docker compose exec -T backend python3 manage.py check
+sudo docker compose exec -T backend python3 manage.py migrate --check
+
+# Check PostgreSQL and Redis
+sudo docker compose exec -T pgdatabase pg_isready
+sudo docker compose exec -T redis redis-cli ping
+
+# Stop containers without deleting bind-mounted data
+sudo docker compose down
+```
+
+## Published ports
+
+| Port | Service |
+| --- | --- |
+| TCP 80 | Web interface and API |
+| TCP 20–21, 21100–21120 | FTP and passive FTP range |
+| TCP 139, 445 and UDP 137–138 | Samba DCP share |
+| TCP 16888 | aria2 JSON-RPC |
+| TCP 8000 / 8001 | Backend and ASGI diagnostic access |
+| TCP 5432 | PostgreSQL; restrict this at the host firewall |
+
+Only expose services to networks that need them. In particular, do not publish
+PostgreSQL, aria2 RPC, FTP, or player networks to the public Internet.
+
+## Troubleshooting
+
+### The web page does not open
+
+```bash
+sudo docker compose ps --all
+sudo docker compose logs --tail=100 nginx backend backendc
+curl -fsS http://127.0.0.1/api/catcher/GetVersion/
+```
+
+If nginx reports an upstream lookup failure, confirm both `backend` and
+`backendc` are running, then recreate nginx with `docker compose up -d nginx`.
+
+### A background action appears not to start
+
+Open **Backend Processes** in the top bar, then check the correct worker:
+
+```bash
+sudo docker compose logs --tail=150 worker
+sudo docker compose logs --tail=150 worker_mon
+sudo docker compose logs --tail=150 worker_kdm
+sudo docker compose logs --tail=150 beat
+```
+
+General work, status polling, and KDM delivery deliberately use separate queues.
+
+### Redis says a task is already queued
+
+Do not assume flushing Redis is the correct fix. A database-backed task or an
+active Celery worker may still own the operation. Inspect Backend Processes and
+worker logs first. Restarting or flushing infrastructure can hide the cause and
+may discard useful state.
+
+### A player is offline
+
+Confirm routing from the Catcher host and from the backend container, then test
+the configured player credentials. Player Status monitoring and AutoKDM delivery
+are separate enable flags; disabling status display does not disable AutoKDM.
+
+### Storage permissions fail
+
+Confirm the expected filesystems are mounted and accessible before changing
+permissions:
+
+```bash
+findmnt /opt/catcher/storage
+sudo docker compose exec -T backend ls -ld /opt/catcher/storage
+sudo docker compose exec -T redis ls -ld /opt/catcher/redis
+```
+
+## Documentation and support
+
+- Current installation guide: this README.
+- Catcher 3 upgrade: [UPGRADING_FROM_V3.md](UPGRADING_FROM_V3.md).
+- Historical v3 install guide: [README_V3.md](README_V3.md).
+- Historical transfer and AutoKDM notes:
+  [Manual.md](Manual.md) and [Manual_AutoKDM.md](Manual_AutoKDM.md).
+- Current operator manuals: **Manuals and Support** inside the running v4 UI.
+- Bugs and feature requests: use the GitHub issue tracker for this project.
+
+When reporting a problem, include the Catcher version, player vendor/software,
+the affected service, the relevant log excerpt, and whether the problem can be
+reproduced without production playback.

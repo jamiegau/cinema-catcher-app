@@ -1,6 +1,7 @@
 #
-# This file is a template example of a docker-compose.yml file used to install catcher app onto a server
-# please see the README.md file for more information.
+# Cinema Catcher 4.x production installation template.
+# See README.md for a new installation and UPGRADING_FROM_V3.md before
+# attempting to use this file with a Catcher 3.x database.
 #
 # James Gardiner
 #
@@ -8,14 +9,14 @@
 services:
 
   pgdatabase:
-    image: postgres:13.1
+    image: ${POSTGRES_IMAGE:-postgres:18-trixie}
     restart: always
     ports:
       - "5432:5432"
     env_file:
       - database.env # configure postgres
     volumes:
-      - /opt/catcher/postgresql/data:/var/lib/postgresql/data/
+      - ${POSTGRES_DATA_DIR:-/opt/catcher/postgresql/18}:${POSTGRES_CONTAINER_DATA_DIR:-/var/lib/postgresql}
     networks:
       - backend_network
     logging:
@@ -24,10 +25,10 @@ services:
         max-size: "5m"
 
   redis:
-    image: redislabs/redistimeseries:latest
+    image: redis:8-trixie
     hostname: redis
     restart: always
-    command: ["/usr/local/bin/redis-server", "--loadmodule", "/usr/lib/redis/modules/redistimeseries.so", "--dir", "/opt/catcher/redis/.", "--dbfilename", "redis_dump.rdb", "--save", "300", "100"]
+    command: ["/usr/local/bin/redis-server", "--dir", "/opt/catcher/redis/.", "--dbfilename", "redis_dump.rdb", "--save", "300", "100"]
     expose:
       - "6379"
     networks:
@@ -42,9 +43,9 @@ services:
         max-size: "5m"
 
   backend:
-    image: jamiegau/catcher_backend:3.0
+    image: jamiegau/catcher_backend:4.0
     restart: always
-    # Set the HOSTNAME the catcher instance will be know as in the conteiner.
+    # Set the hostname by which this Catcher instance will be known.
     # for example, catcher-CINEMA-LOCATION such as catcher-chain-state or catcher-clubmovie-forbes
     hostname: ${CATCHER_HOSTNAME}
     security_opt:
@@ -78,7 +79,7 @@ services:
         max-size: "5m"
 
   backendc:
-    image: jamiegau/catcher_backend:3.0
+    image: jamiegau/catcher_backend:4.0
     restart: always
     # Set the HOSTNAME the catcher instance will be know as in the conteiner.
     # for example, catcher-CINEMA-LOCATION such as catcher-chain-state or catcher-clubmovie-forbes
@@ -114,7 +115,7 @@ services:
 
   # Celery worker
   worker:
-    image: jamiegau/catcher_backend:3.0
+    image: jamiegau/catcher_backend:4.0
     restart: always
     hostname: worker
     privileged: true
@@ -139,7 +140,7 @@ services:
         max-size: "5m"
 
   worker_mon:
-    image: jamiegau/catcher_backend:3.0
+    image: jamiegau/catcher_backend:4.0
     restart: always
     hostname: worker_mon
     privileged: true
@@ -163,9 +164,35 @@ services:
       options:
         max-size: "5m"
 
+  # Dedicated KDM delivery queue. Keeping player connection timeouts here stops
+  # an offline auditorium from blocking status monitoring or general tasks.
+  worker_kdm:
+    image: jamiegau/catcher_backend:4.0
+    restart: always
+    hostname: worker_kdm
+    privileged: true
+    working_dir: /data/backend
+    command: celery -A dcinenet_catcher worker --loglevel=info --concurrency=8 --queues=kdm_delivery --prefetch-multiplier=1
+    networks:
+      - backend_network
+    depends_on:
+      - pgdatabase
+      - redis
+    volumes:
+      - /etc/machine-id:/etc/machine-id
+      - /opt/catcher/storage:/opt/catcher/storage
+      - /opt/dcinenet/storage:/opt/dcinenet/storage
+    environment:
+      - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
+      - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+
   # Celery Beat
   beat:
-    image: jamiegau/catcher_backend:3.0
+    image: jamiegau/catcher_backend:4.0
     restart: always
     hostname: beat
     working_dir: /data/backend
@@ -184,15 +211,41 @@ services:
       options:
         max-size: "5m"
 
+  network-monitor:
+    image: jamiegau/catcher_backend:4.0
+    restart: always
+    hostname: network-monitor
+    working_dir: /data/backend
+    command: python3 manage.py monitor_network_interfaces --interval 10 --raw-retention-days 2 --rollup-retention-days 90
+    networks:
+      - backend_network
+    depends_on:
+      - pgdatabase
+    volumes:
+      # /sys/class/net entries link into /sys/devices, so mount all of sysfs.
+      - /sys:/host/sys:ro
+    environment:
+      - 'TIMEZONE_NAME=${LOCAL_TIMEZONE_NAME}'
+      - 'IN_PRODUCTION=${IN_PRODUCTION:-True}'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+
   nginx:
-    image: jamiegau/catcher_nginx:3.0
+    image: jamiegau/catcher_nginx:4.0
     hostname: nginx
     restart: always
     ports:
       - "80:80"
         #      - "443:443"
+    depends_on:
+      - backend
+      - backendc
     networks:
       - backend_network
+    volumes:
+      - /opt/catcher/storage:/opt/catcher/storage:ro
     # this must be set to the exposed IP adress on the projection network.
     extra_hosts:
       - "host.docker.internal:${EXPOSED_IP_PROJECTION_NETWORK}"
@@ -203,7 +256,7 @@ services:
 
 
   ftpserver:
-    image: jamiegau/catcher_ftpserver:3.0
+    image: jamiegau/catcher_ftpserver:4.0
     restart: always
     ports:
       - 0.0.0.0:20:20
@@ -225,7 +278,7 @@ services:
         max-size: "5m"
 
   aria2server:
-    image: jamiegau/catcher_aria2server:3.0
+    image: jamiegau/catcher_aria2server:4.0
     hostname: aria2server
     restart: always
     ports:
@@ -243,7 +296,7 @@ services:
       driver: "json-file"
       options:
         max-size: "5m"
-      
+
   samba:
     image: dperson/samba
     hostname: samba
@@ -264,11 +317,13 @@ services:
 
   netbird:
     image: netbirdio/netbird:latest
+    profiles:
+      - netbird
     restart: always
     hostname: netbird
     network_mode: "host"
     environment:
-      - NB_SETUP_KEY=5558D99A-DF82-4355-976B-FC5525F90181
+      - NB_SETUP_KEY=${NB_SETUP_KEY:-}
       - NB_MANAGEMENT_URL=https://lighthouse.digitall.net.au:443
       - NB_ADMIN_URL=https://lighthouse.digitall.net.au:443
       - NB_LOG_LEVEL=warn
@@ -286,4 +341,3 @@ services:
 
 networks:
     backend_network:
-    

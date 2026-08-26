@@ -1,4 +1,7 @@
-#!/bin/bash
-# Used to monitor the output of the docker containers.
-# can specify the container to watch, of if no argument, get output of all containers.
-docker compose logs -f --tail="10" $1
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
+
+# Pass an optional service name, for example: ./TAIL.sh backend
+docker compose logs --follow --tail=50 "$@"
