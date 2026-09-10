@@ -8,7 +8,11 @@ theatre-management tools for exhibitors.
 > **Upgrading an existing Catcher 3 installation?** Do not replace the Compose
 > file or run `update.sh` yet. Catcher 4 moves from PostgreSQL 13 to PostgreSQL
 > 18 and requires a controlled database migration. Follow
-> [Upgrading from Catcher 3](UPGRADING_FROM_V3.md).
+> [Upgrading from Catcher 3 — SSH login and exact command walkthrough](UPGRADING_FROM_V3.md).
+> The guide includes an already-stopped v3 stack, verified cold backups,
+> explicit old-installation paths, database migration, v4 cutover and rollback.
+> Do not run the upgrade script without its `--compose-file` and `--env-file`
+> arguments; cloning the v4 helper alone does not upgrade the site.
 
 The previous installation guide is retained as
 [README_V3.md](README_V3.md) for historical reference. It must not be used for
