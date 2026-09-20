@@ -5,7 +5,7 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-COMPOSE_FILE="docker_compose_production.yml"
+COMPOSE_FILE="docker-compose.yml"
 ENV_FILE="database.env"
 OLD_DATA_DIR="/opt/catcher/postgresql/data"
 NEW_DATA_DIR="/opt/catcher/postgresql/18"
@@ -17,6 +17,7 @@ ASSUME_YES=false
 MODE="upgrade"
 ROLLBACK_ARMED=false
 RESTORE_FROM=""
+RESULT_FILE=""
 
 # The checked-in Compose file targets PostgreSQL 18. During migration and any
 # rollback, force Compose to describe the still-active PostgreSQL 13 service.
@@ -37,7 +38,7 @@ the Docker Compose file; it prints the required image and volume changes after
 the restored database has been validated.
 
 Options:
-  -f, --compose-file FILE   Compose file to use (default: docker_compose_production.yml)
+  -f, --compose-file FILE   Compose file to use (default: docker-compose.yml)
       --env-file FILE       PostgreSQL env file (default: database.env)
       --old-data-dir DIR    Existing PostgreSQL 13 data directory
       --new-data-dir DIR    New PostgreSQL 18 volume directory
@@ -46,6 +47,7 @@ Options:
       --status              Inspect containers and all PostgreSQL data copies
       --reset-failed        Restore a verified PostgreSQL 13 layout for another attempt
       --restore-from DIR    PostgreSQL 13 directory to use with --reset-failed
+      --result-file FILE    Write a machine-readable success record (for UPGRADE_TO_V4.sh)
   -y, --yes                 Skip the typed confirmation
   -h, --help                Show this help
 
@@ -113,6 +115,11 @@ while [[ $# -gt 0 ]]; do
         --restore-from)
             [[ $# -ge 2 ]] || fail "$1 requires a value"
             RESTORE_FROM="$2"
+            shift 2
+            ;;
+        --result-file)
+            [[ $# -ge 2 ]] || fail "$1 requires a value"
+            RESULT_FILE="$2"
             shift 2
             ;;
         -y|--yes)
@@ -340,6 +347,13 @@ if [[ "$MODE" == reset ]]; then
     exit 0
 fi
 use_postgres13_compose
+if [[ -n "$RESULT_FILE" ]]; then
+    command -v python3 >/dev/null || fail "python3 is required for --result-file"
+    [[ ! -e "$RESULT_FILE" ]] || fail "Result file already exists: $RESULT_FILE"
+fi
+if docker inspect "$TEMP_CONTAINER" >/dev/null 2>&1; then
+    fail "Temporary upgrade container already exists. Inspect --status before retrying."
+fi
 if command -v sha256sum >/dev/null 2>&1; then
     SHA256_COMMAND=(sha256sum)
 elif command -v shasum >/dev/null 2>&1; then
@@ -582,6 +596,18 @@ docker exec "$TEMP_CONTAINER" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_E
 log "Stopping temporary PostgreSQL 18 container"
 docker stop -t 60 "$TEMP_CONTAINER" >/dev/null
 docker rm "$TEMP_CONTAINER" >/dev/null
+
+if [[ -n "$RESULT_FILE" ]]; then
+    python3 - "$RESULT_FILE" "$SQL_DUMP" "$OLD_DATA_BACKUP" "$NEW_DATA_DIR" <<'PY'
+import json, os, sys
+path, archive, physical, new_data = sys.argv[1:]
+with open(path, 'x') as handle:
+    os.chmod(path, 0o600)
+    json.dump({'archive': archive, 'postgres13': physical, 'postgres18': new_data}, handle)
+    handle.flush()
+    os.fsync(handle.fileno())
+PY
+fi
 
 MIGRATION_COMPLETE=true
 ROLLBACK_ARMED=false

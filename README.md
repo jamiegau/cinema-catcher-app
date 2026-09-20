@@ -8,11 +8,11 @@ theatre-management tools for exhibitors.
 > **Upgrading an existing Catcher 3 installation?** Do not replace the Compose
 > file or run `update.sh` yet. Catcher 4 moves from PostgreSQL 13 to PostgreSQL
 > 18 and requires a controlled database migration. Follow
-> [Upgrading from Catcher 3 — SSH login and exact command walkthrough](UPGRADING_FROM_V3.md).
-> The guide includes an already-stopped v3 stack, verified cold backups,
-> explicit old-installation paths, database migration, v4 cutover and rollback.
-> Do not run the upgrade script without its `--compose-file` and `--env-file`
-> arguments; cloning the v4 helper alone does not upgrade the site.
+> [Upgrading from Catcher 3 — one-command guided upgrade](UPGRADING_FROM_V3.md).
+> Download `UPGRADE_TO_V4.sh` into the existing v3 installation and run it with
+> `sudo bash UPGRADE_TO_V4.sh`. It handles backups, PostgreSQL migration,
+> Compose replacement, application setup/checks and startup. No second checkout
+> or manual database commands are needed for a standard installation.
 
 The previous installation guide is retained as
 [README_V3.md](README_V3.md) for historical reference. It must not be used for
@@ -306,7 +306,7 @@ Detailed operator help is available from **Manuals and Support** inside Catcher.
 
 ## Updating an existing Catcher 4 installation
 
-Create a database backup first, then run:
+Create a database backup first. For a standard v4 checkout, run:
 
 ```bash
 cd /opt/cinema-catcher-app
@@ -314,11 +314,16 @@ sudo git pull --ff-only
 sudo ./update.sh
 ```
 
+If upgraded with `UPGRADE_TO_V4.sh`, the site has a generated Compose file.
+**Skip `git pull`** and run `sudo bash update.sh` from that existing directory.
+Review any future template changes separately; do not overwrite site settings.
+
 `update.sh` refuses to run when it detects the normal Catcher 3/PostgreSQL 13
 data path. For v4 it pulls images, stops database-writing application services,
 applies and checks migrations, runs Catcher setup, restarts the stack, and
-removes only dangling images. It does not prune persistent volumes or remove
-rollback images.
+removes only dangling images on installations without saved upgrade state.
+With `.catcher-upgrade/state.json` present, image pruning is skipped to retain
+the recorded rollback images. Persistent volumes are not pruned.
 
 ## Backups
 

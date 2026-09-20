@@ -29,7 +29,12 @@ docker compose run --rm backend python3 ./manage.py check
 docker compose run --rm backend python3 ./manage.py catcher_setup
 docker compose up -d
 
-# Remove only dangling images. Persistent volumes and rollback images are kept.
-docker image prune --force
+# A guided upgrade records exact old image IDs for rollback. Some can become
+# dangling after a pull, so do not prune while that recovery state is retained.
+if [[ -f .catcher-upgrade/state.json ]]; then
+    echo 'Keeping old images for the saved v3 upgrade rollback.'
+else
+    docker image prune --force
+fi
 
 docker compose ps --all
