@@ -66,6 +66,9 @@ services:
     working_dir: /data/backend
     command: gunicorn dcinenet_catcher.wsgi:application --bind=0.0.0.0:8000 --timeout 60 --workers 4
     volumes:
+      # Live host nodes and metadata are required for disks attached after startup.
+      - /dev:/dev
+      - /run/udev:/run/udev:ro
       - /etc/machine-id:/etc/machine-id
       - /opt/catcher/storage:/opt/catcher/storage
       - /opt/dcinenet/storage:/opt/dcinenet/storage
@@ -101,6 +104,8 @@ services:
     working_dir: /data/backend
     command: daphne dcinenet_catcher.asgi:application -b 0.0.0.0 -p 8001
     volumes:
+      - /dev:/dev
+      - /run/udev:/run/udev:ro
       - /etc/machine-id:/etc/machine-id
       - /opt/catcher/storage:/opt/catcher/storage
       - /opt/dcinenet/storage:/opt/dcinenet/storage
@@ -127,6 +132,9 @@ services:
       - redis
       - pgdatabase
     volumes:
+      # Device ingestion runs in this worker, not just in the web scanner.
+      - /dev:/dev
+      - /run/udev:/run/udev:ro
       - /etc/machine-id:/etc/machine-id
       - /opt/catcher/storage:/opt/catcher/storage
       - /opt/dcinenet/storage:/opt/dcinenet/storage

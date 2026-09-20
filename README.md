@@ -434,6 +434,16 @@ are separate enable flags; disabling status display does not disable AutoKDM.
 
 ### Storage permissions fail
 
+For an ingest disk that appears in the host's `lsblk` but not **Ingest → Devices**,
+check that `backend`, `backendc` and `worker` all have the `/dev:/dev` and
+`/run/udev:/run/udev:ro` bind mounts from the current Compose template. A
+privileged container alone may not see device nodes added after it started.
+Merge these mounts into existing site configuration and recreate the affected
+services in an idle ingest window; a simple container restart does not apply
+mount changes. The backend image must also include the device-name and exact
+mountpoint fixes. Do not format the disk or disable the system-disk safety
+filter to work around missing device visibility.
+
 Confirm the expected filesystems are mounted and accessible before changing
 permissions:
 
