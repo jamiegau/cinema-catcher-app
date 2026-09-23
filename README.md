@@ -306,7 +306,10 @@ Detailed operator help is available from **Manuals and Support** inside Catcher.
 
 ## Updating an existing Catcher 4 installation
 
-Create a database backup first. For a standard v4 checkout, run:
+Create a database backup first and finish active downloads, ingests and jobs.
+The update takes the whole Compose stack offline, including FTP and the web
+interface. Use local/LAN SSH or a console, not a VPN container in this stack.
+For a standard v4 checkout, run:
 
 ```bash
 cd /opt/cinema-catcher-app
@@ -319,9 +322,21 @@ If upgraded with `UPGRADE_TO_V4.sh`, the site has a generated Compose file.
 Review any future template changes separately; do not overwrite site settings.
 
 `update.sh` refuses to run when it detects the normal Catcher 3/PostgreSQL 13
-data path. For v4 it pulls images, stops database-writing application services,
-applies and checks migrations, runs Catcher setup, restarts the stack, and
-removes only dangling images on installations without saved upgrade state.
+data path. For v4 it validates configuration and pulls images **before downtime**,
+then runs `docker compose down --remove-orphans --timeout 60`. It starts only
+PostgreSQL and Redis, waits for PostgreSQL readiness, applies and checks
+migrations, and runs Catcher setup in temporary containers. Finally,
+`docker compose up -d` recreates the stack, including nginx, so it resolves the
+new backend addresses instead of retaining stale IPs and returning Bad Gateway.
+The script never uses `down --volumes`; database and storage data are retained.
+Keep any required `COMPOSE_PROFILES` selection consistent when running the update
+(for example, `sudo env COMPOSE_PROFILES=netbird bash update.sh` if this stack
+manages NetBird). A full shutdown may disconnect that VPN.
+
+If migration/setup fails, the script exits without starting the application.
+Inspect the error, correct it, and rerun `update.sh`; do not bypass a failed
+upgrade with `start.sh`. Successful updates remove only dangling images on
+installations without saved upgrade state.
 With `.catcher-upgrade/state.json` present, image pruning is skipped to retain
 the recorded rollback images. Persistent volumes are not pruned.
 
