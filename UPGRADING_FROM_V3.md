@@ -13,6 +13,8 @@ into your **existing v3 installation** and let it coordinate the upgrade.
   against a failed system disk.
 - Use LAN SSH or a console. Do not depend solely on a remote-access container.
   The script leaves NetBird running, but independent access is still important.
+- For a remote upgrade, run the command inside `tmux` or `screen` when one is
+  available. This lets the upgrade continue if the SSH connection drops.
 - Requirements: Linux, sudo, Python 3, Git, curl, Docker Engine and the Compose
   plugin (`docker compose`). Standard Ubuntu utilities including `pgrep`, `cp`,
   `diff`, `du`, `df` and SHA-256 tools must be installed.
@@ -33,6 +35,17 @@ path: it may be `~/git/cinema-catcher-app` or `/opt/cinema-catcher-app`.
 ```bash
 cd ~/git/cinema-catcher-app
 ```
+
+For extra protection against an interrupted SSH connection, start a persistent
+terminal first (optional):
+
+```bash
+tmux new -s catcher-v4-upgrade
+```
+
+Run the upgrade command below inside that terminal. Detach with `Ctrl-B`, then
+`D`; reconnect later with `tmux attach -t catcher-v4-upgrade`. Do not start a
+second upgrade while the first one is still running.
 
 Then this is the **single upgrade command**:
 
