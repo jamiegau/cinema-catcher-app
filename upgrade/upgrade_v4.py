@@ -299,6 +299,24 @@ class Upgrade:
         self.run(['cp', '-a', '--', source, destination])
         self.run(['diff', '-qr', '--', source, destination])
 
+    def service_containers(self, file, service):
+        """Return regular Compose service containers, excluding `compose run` jobs."""
+        ids = self.compose(file, 'ps', '-aq', service, capture=True).stdout.decode().split()
+        if not ids:
+            return []
+        containers = json.loads(self.run(['docker', 'inspect'] + ids, capture=True).stdout)
+        result = []
+        for container in containers:
+            labels = container.get('Config', {}).get('Labels') or {}
+            if labels.get('com.docker.compose.project') != self.state['project']:
+                continue
+            if labels.get('com.docker.compose.service') != service:
+                continue
+            if str(labels.get('com.docker.compose.oneoff', '')).lower() == 'true':
+                continue
+            result.append(container)
+        return result
+
     def wait_http(self, file, *, aria2=False):
         request = ('r=requests.post("http://aria2server:16888/jsonrpc", json={"jsonrpc":"2.0","id":"upgrade","method":"aria2.getVersion"}, timeout=5)\n'
                    '        r.raise_for_status()\n        assert "result" in r.json()') if aria2 else (
@@ -333,19 +351,22 @@ class Upgrade:
             maintenance_config['services'][name]['restart'] = 'no'
         write_compose(backup / 'old-resolved.json', maintenance_config)
         write_compose(backup / 'candidate-v4.json', self.candidate)
+        # Record the recovery location before inspecting containers. An early,
+        # pre-downtime stop must still produce useful --status output.
+        self.save('prepared')
         # Pin rollback images by ID before pulling mutable release tags.
         rollback_config = copy.deepcopy(self.old)
         for name in self.services:
             image = self.old['services'][name]['image']
-            containers = self.compose(self.install / 'docker-compose.yml', 'ps', '-aq', name, capture=True).stdout.decode().split()
+            containers = self.service_containers(self.install / 'docker-compose.yml', name)
             require(len(containers) <= 1, 'Scaled v3 services require review: ' + name)
             if containers:
-                result = self.run(['docker', 'inspect', containers[0], '--format', '{{.Image}}'], capture=True)
+                image_id = containers[0]['Image']
             else:
                 result = self.run(['docker', 'image', 'inspect', image, '--format', '{{.Id}}'], capture=True)
-            rollback_config['services'][name]['image'] = result.stdout.decode().strip()
+                image_id = result.stdout.decode().strip()
+            rollback_config['services'][name]['image'] = image_id
         write_compose(backup / 'rollback-compose.json', rollback_config)
-        self.save('prepared')
         self.compose(backup / 'candidate-v4.json', 'config', '--quiet')
         rendered = self.config(backup / 'candidate-v4.json')
         require(rendered['services']['pgdatabase']['environment'] == self.candidate['services']['pgdatabase']['environment'],

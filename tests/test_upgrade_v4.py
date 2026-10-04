@@ -236,14 +236,46 @@ class WorkflowTests(unittest.TestCase):
         def run(args, **kwargs):
             tokens = [str(a) for a in args]
             if tokens[-3:] == ['ps', '-aq', 'backend']:
-                return subprocess.CompletedProcess(tokens, 0, stdout=b'old-backend-container\n')
-            if tokens[:3] == ['docker', 'inspect', 'old-backend-container']:
-                return subprocess.CompletedProcess(tokens, 0, stdout=b'sha256:actual-running-image\n')
+                return subprocess.CompletedProcess(tokens, 0, stdout=b'backend-main\nbackend-run\n')
+            if tokens[:2] == ['docker', 'inspect'] and tokens[2:] == ['backend-main', 'backend-run']:
+                return subprocess.CompletedProcess(tokens, 0, stdout=json.dumps([
+                    {
+                        'Id': 'backend-main',
+                        'Image': 'sha256:actual-running-image',
+                        'Config': {'Labels': {
+                            'com.docker.compose.project': 'site-catcher',
+                            'com.docker.compose.service': 'backend',
+                            'com.docker.compose.oneoff': 'False',
+                        }},
+                    },
+                    {
+                        'Id': 'backend-run',
+                        'Image': 'sha256:one-off-image',
+                        'Config': {'Labels': {
+                            'com.docker.compose.project': 'site-catcher',
+                            'com.docker.compose.service': 'backend',
+                            'com.docker.compose.oneoff': 'True',
+                        }},
+                    },
+                ]).encode())
             return original_run(args, **kwargs)
         with patch.object(self.engine, 'run', side_effect=run):
             self.engine.execute()
         saved = json.loads((Path(self.engine.state['backup'])/'rollback-compose.json').read_text())
         self.assertEqual(saved['services']['backend']['image'], 'sha256:actual-running-image')
+
+    def test_early_container_inspection_failure_records_recovery_bundle(self):
+        original_run = self.engine.run
+        def run(args, **kwargs):
+            tokens = [str(a) for a in args]
+            if tokens[-3:] == ['ps', '-aq', 'backend']:
+                raise u.UpgradeError('simulated container inspection failure')
+            return original_run(args, **kwargs)
+        with patch.object(self.engine, 'run', side_effect=run):
+            with self.assertRaisesRegex(u.UpgradeError, 'container inspection failure'):
+                self.engine.execute()
+        self.assertEqual(self.engine.state['phase'], 'prepared')
+        self.assertTrue(Path(self.engine.state['backup']).is_dir())
 
     def test_database_failure_does_not_install_v4_or_start_writers(self):
         self.engine.fail = 'database'
