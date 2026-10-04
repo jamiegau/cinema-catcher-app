@@ -71,6 +71,22 @@ def command_tokens(command):
     return shlex.split(command) if isinstance(command, str) else (command or [])
 
 
+def project_orphans(containers, project, configured_services):
+    """List running regular containers from this project that Compose no longer declares."""
+    configured_services = set(configured_services)
+    result = []
+    for container in containers:
+        labels = container.get('Config', {}).get('Labels') or {}
+        if labels.get('com.docker.compose.project') != project:
+            continue
+        if str(labels.get('com.docker.compose.oneoff', '')).lower() == 'true':
+            continue
+        service = labels.get('com.docker.compose.service')
+        if service and service not in configured_services:
+            result.append((container.get('Name') or service).lstrip('/'))
+    return sorted(result)
+
+
 def bind_for(service, target):
     matches = [v for v in service.get('volumes', []) if v.get('target', '').rstrip('/') == target.rstrip('/')]
     require(len(matches) == 1 and matches[0].get('type') == 'bind', 'Expected one bind mount at ' + target)
@@ -250,6 +266,9 @@ class Upgrade:
         require(candidate['services']['backend'].get('hostname'), 'CATCHER_HOSTNAME is missing.')
         require(candidate['services']['backend'].get('environment', {}).get('TIMEZONE_NAME'), 'LOCAL_TIMEZONE_NAME is missing.')
         self.assert_no_foreign_database(old['name'])
+        orphans = self.running_project_orphans(old['name'], old['services'])
+        require(not orphans,
+                'Running containers from removed Compose services require review and must be stopped: ' + ', '.join(orphans))
         for mount in old['services']['backend'].get('volumes', []):
             if mount.get('target') in ('/opt/catcher/storage', '/opt/dcinenet/storage'):
                 require(Path(mount['source']).is_dir(), 'Content mount source is missing: ' + mount['source'])
@@ -276,6 +295,13 @@ class Upgrade:
                 if source == OLD_DATA or source in OLD_DATA.parents or OLD_DATA in source.parents:
                     require(labels.get('com.docker.compose.project') == project and labels.get('com.docker.compose.service') == 'pgdatabase',
                             'Another running container can access the source database; stop and review it.')
+
+    def running_project_orphans(self, project, configured_services):
+        ids = self.run(['docker', 'ps', '-q'], capture=True).stdout.decode().split()
+        if not ids:
+            return []
+        containers = json.loads(self.run(['docker', 'inspect'] + ids, capture=True).stdout)
+        return project_orphans(containers, project, configured_services)
 
     def wait_database(self, file, expected):
         for _ in range(90):

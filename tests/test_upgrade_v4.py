@@ -97,6 +97,34 @@ class ConfigTests(unittest.TestCase):
             with self.assertRaises(u.UpgradeError):
                 u.make_candidate(old, new)
 
+    def test_running_removed_service_is_an_orphan_but_one_off_jobs_are_not(self):
+        containers = [
+            {'Name': '/site-backend-1', 'Config': {'Labels': {
+                'com.docker.compose.project': 'site-catcher',
+                'com.docker.compose.service': 'backend',
+                'com.docker.compose.oneoff': 'False',
+            }}},
+            {'Name': '/site-tp-1', 'Config': {'Labels': {
+                'com.docker.compose.project': 'site-catcher',
+                'com.docker.compose.service': 'tp',
+                'com.docker.compose.oneoff': 'False',
+            }}},
+            {'Name': '/site-backend-run-123', 'Config': {'Labels': {
+                'com.docker.compose.project': 'site-catcher',
+                'com.docker.compose.service': 'backend',
+                'com.docker.compose.oneoff': 'True',
+            }}},
+            {'Name': '/other-tp-1', 'Config': {'Labels': {
+                'com.docker.compose.project': 'other-site',
+                'com.docker.compose.service': 'tp',
+                'com.docker.compose.oneoff': 'False',
+            }}},
+        ]
+        self.assertEqual(
+            u.project_orphans(containers, 'site-catcher', {'backend'}),
+            ['site-tp-1'],
+        )
+
 
 class FakeUpgrade(u.Upgrade):
     def __init__(self, install, release, fail=None):
@@ -119,6 +147,9 @@ class FakeUpgrade(u.Upgrade):
 
     def assert_no_foreign_database(self, *_):
         pass
+
+    def running_project_orphans(self, *_):
+        return []
 
     def wait_database(self, file, expected):
         self.commands.append(['ready-database', str(expected)])

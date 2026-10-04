@@ -152,7 +152,8 @@ merges required v4 mounts and new worker services.
 
 It stops for review on ambiguous previous attempts, extra databases or database roles,
 tablespaces/external WAL, alternate database/service data locations, custom
-commands/entrypoints/services, Compose override files, or named volumes.
+commands/entrypoints/services, Compose override files, named volumes, or running
+containers from services that have been removed from the current Compose file.
 Missing required settings are reported rather than guessed. Redis data is
 never discarded to bypass a compatibility or permissions problem.
 
