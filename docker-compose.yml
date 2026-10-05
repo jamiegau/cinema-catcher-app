@@ -47,7 +47,7 @@ services:
     restart: always
     # Set the hostname by which this Catcher instance will be known.
     # for example, catcher-CINEMA-LOCATION such as catcher-chain-state or catcher-clubmovie-forbes
-    hostname: ${CATCHER_HOSTNAME}
+    hostname: cinema-city-tms
     security_opt:
       - seccomp:unconfined
     privileged: true
