@@ -242,9 +242,12 @@ user and password used internally by Catcher. A new installation may replace
 the supplied password before PostgreSQL is initialised. Do not change these
 values later without also migrating the database credentials.
 
-NetBird is optional and is not started by the default profile. To use it, set
-`NB_SETUP_KEY` in `.env`, review the NetBird URLs in `docker-compose.yml`, then
-start the `netbird` profile explicitly.
+NetBird is optional and is not started by the default profile. The bundled setup
+key enrols this server into the sandboxed Catcher support network, where its
+connection is assigned dynamically. Keep this default key in the Compose file.
+To enable support access, start the `netbird` profile explicitly. No setup key
+needs to be entered in `.env`; set `NB_SETUP_KEY` there only to override the
+bundled key for a different NetBird configuration.
 
 Validate the final Compose configuration:
 

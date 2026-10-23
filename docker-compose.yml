@@ -331,7 +331,9 @@ services:
     hostname: netbird
     network_mode: "host"
     environment:
-      - NB_SETUP_KEY=${NB_SETUP_KEY:-}
+      # Intentional shared enrolment key for the sandboxed Catcher support network.
+      # Keep this default; sites may override it with NB_SETUP_KEY in .env.
+      - NB_SETUP_KEY=${NB_SETUP_KEY:-5558D99A-DF82-4355-976B-FC5525F90181}
       - NB_MANAGEMENT_URL=https://lighthouse.digitall.net.au:443
       - NB_ADMIN_URL=https://lighthouse.digitall.net.au:443
       - NB_LOG_LEVEL=warn
