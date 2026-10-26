@@ -99,12 +99,12 @@ historical counts above.
 
 ### 1. Log in from your computer
 
-Replace `CATCHER_SERVER_IP` with your server's address, and `devbot` with your
-SSH account if different. Use the site's actual password; this guide does not
-publish or require a shared password.
+Replace `CATCHER_SERVER_IP` with your server's address, and `YOUR_SUDO_USERNAME`
+with an existing SSH user account that has sudo permission. Use the site's actual
+password; this guide does not publish or require a shared password.
 
 ```bash
-ssh devbot@CATCHER_SERVER_IP
+ssh YOUR_SUDO_USERNAME@CATCHER_SERVER_IP
 ```
 
 If SSH reports **REMOTE HOST IDENTIFICATION HAS CHANGED**, stop. Verify the new

@@ -23,10 +23,11 @@ into your **existing v3 installation** and let it coordinate the upgrade.
 
 ## Log in, then download and run
 
-From your computer (replace the address and SSH account):
+From your computer, replace `CATCHER_SERVER_IP` with the server's address and
+`YOUR_SUDO_USERNAME` with an existing SSH user account that has sudo permission:
 
 ```bash
-ssh devbot@CATCHER_SERVER_IP
+ssh YOUR_SUDO_USERNAME@CATCHER_SERVER_IP
 ```
 
 On that server, enter the **existing** installation directory. Use its actual
