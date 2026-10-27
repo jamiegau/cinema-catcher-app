@@ -265,6 +265,8 @@ services:
 
   ftpserver:
     image: jamiegau/catcher_ftpserver:4.0
+    # Reap orphaned session processes before vsftpd sees unknown child PIDs.
+    init: true
     restart: always
     ports:
       - 0.0.0.0:20:20

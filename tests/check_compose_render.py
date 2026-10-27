@@ -28,6 +28,7 @@ with tempfile.TemporaryDirectory(prefix='catcher-compose-fixture-') as temporary
     def config(path):
         return json.loads(subprocess.check_output(base + ['-f', str(path), 'config', '--format', 'json'], env=environment))
     old, latest = config(site/'v3.yml'), config(ROOT/'docker-compose.yml')
+    assert latest['services']['ftpserver']['init'] is True
     assert latest['services']['netbird']['environment']['NB_SETUP_KEY'] == support_key
     with (site/'.env').open('a') as output:
         output.write('NB_SETUP_KEY=\n')
@@ -46,4 +47,5 @@ with tempfile.TemporaryDirectory(prefix='catcher-compose-fixture-') as temporary
     assert u.bind_for(validated['services']['redis'], '/data')['source'] == '/opt/catcher/redis'
     assert validated['services']['backend']['image'] == 'jamiegau/catcher_backend:4.0'
     assert 'worker_kdm' in validated['services']
+    assert validated['services']['ftpserver']['init'] is True
     print('PASS: actual historical v3 and current v4 Compose templates render and merge safely with site credentials.')

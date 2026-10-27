@@ -145,6 +145,9 @@ def make_candidate(old, release):
         for key, value in previous.items():
             if key not in managed:
                 latest[key] = copy.deepcopy(value)
+        if name == 'ftpserver':
+            # The listener cannot safely reap orphaned session processes as PID 1.
+            latest['init'] = True
         latest.setdefault('environment', {}).update(previous.get('environment', {}))
         for variable in ('PGDATA', 'POSTGRES_INITDB_ARGS', 'POSTGRES_INITDB_WALDIR'):
             require(variable not in latest.get('environment', {}), 'Custom PostgreSQL initialization requires review: ' + variable)

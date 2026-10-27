@@ -79,6 +79,13 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(result['environment'], old['services']['netbird']['environment'])
         self.assertEqual(result['profiles'], ['netbird'])
 
+    def test_ftp_listener_uses_init_even_if_disabled_in_old_site(self):
+        old, new = configurations()
+        old['services']['ftpserver']['init'] = False
+        result = u.make_candidate(old, new)
+        self.assertIs(result['services']['ftpserver']['init'], True)
+        self.assertIs(old['services']['ftpserver']['init'], False)
+
     def test_ambiguous_customizations_are_not_silently_discarded(self):
         changes = [
             lambda c: c['services']['backend'].update(command=['custom-entry']),
