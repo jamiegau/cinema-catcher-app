@@ -86,6 +86,17 @@ class ConfigTests(unittest.TestCase):
         self.assertIs(result['services']['ftpserver']['init'], True)
         self.assertIs(old['services']['ftpserver']['init'], False)
 
+    def test_known_legacy_status_worker_moves_to_release_pool_but_custom_commands_stop(self):
+        old, new = configurations()
+        old['services']['worker_mon']['command'] = list(u.V3_STATUS_COMMAND)
+        new['services']['worker_mon']['command'] = ['celery', '-A', 'dcinenet_catcher', 'worker',
+            '--loglevel=info', '--pool=threads', '--concurrency=8', '--queues=status_monitor', '--prefetch-multiplier=1']
+        result = u.make_candidate(old, new)
+        self.assertEqual(result['services']['worker_mon']['command'], new['services']['worker_mon']['command'])
+        old['services']['worker_mon']['command'].append('--include=custom_module')
+        with self.assertRaises(u.UpgradeError):
+            u.make_candidate(old, new)
+
     def test_ambiguous_customizations_are_not_silently_discarded(self):
         changes = [
             lambda c: c['services']['backend'].update(command=['custom-entry']),

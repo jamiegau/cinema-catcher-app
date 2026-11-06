@@ -29,6 +29,8 @@ with tempfile.TemporaryDirectory(prefix='catcher-compose-fixture-') as temporary
         return json.loads(subprocess.check_output(base + ['-f', str(path), 'config', '--format', 'json'], env=environment))
     old, latest = config(site/'v3.yml'), config(ROOT/'docker-compose.yml')
     assert latest['services']['ftpserver']['init'] is True
+    monitor = latest['services']['worker_mon']['command']
+    assert '--pool=threads' in monitor and '--prefetch-multiplier=1' in monitor
     assert latest['services']['netbird']['environment']['NB_SETUP_KEY'] == support_key
     with (site/'.env').open('a') as output:
         output.write('NB_SETUP_KEY=\n')

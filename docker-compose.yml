@@ -153,7 +153,8 @@ services:
     hostname: worker_mon
     privileged: true
     working_dir: /data/backend
-    command: celery -A dcinenet_catcher worker --loglevel=WARNING --concurrency=4 --queues=status_monitor
+    # Barco sessions are connection-bound; share persistent clients across polls.
+    command: celery -A dcinenet_catcher worker --loglevel=info --pool=threads --concurrency=8 --queues=status_monitor --prefetch-multiplier=1
     networks:
       - backend_network
     depends_on:

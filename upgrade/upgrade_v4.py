@@ -27,6 +27,8 @@ FILES = ('docker-compose.yml', '.env', 'database.env', 'start.sh', 'update.sh', 
 INSTALL_FILES = ('start.sh', 'update.sh', 'TAIL.sh', 'UPGRADE_POSTGRES_13_TO_18.sh')
 V3_REDIS_COMMAND = ['/usr/local/bin/redis-server', '--loadmodule', '/usr/lib/redis/modules/redistimeseries.so',
                     '--dir', '/opt/catcher/redis/.', '--dbfilename', 'redis_dump.rdb', '--save', '300', '100']
+V3_STATUS_COMMAND = ['celery', '-A', 'dcinenet_catcher', 'worker', '--loglevel=WARNING',
+                     '--concurrency=4', '--queues=status_monitor']
 
 
 class UpgradeError(RuntimeError):
@@ -131,7 +133,8 @@ def make_candidate(old, release):
         require(not previous.get('build') and not previous.get('entrypoint'), 'Custom build/entrypoint needs review: ' + name)
         require(not previous.get('profiles'), 'Custom service profiles need review: ' + name)
         if name not in ('pgdatabase', 'redis'):
-            require(command_tokens(previous.get('command')) == command_tokens(latest.get('command')),
+            require(command_tokens(previous.get('command')) == command_tokens(latest.get('command'))
+                    or (name == 'worker_mon' and command_tokens(previous.get('command')) == V3_STATUS_COMMAND),
                     'Custom or unsupported service command needs review: ' + name)
         elif name == 'pgdatabase':
             require(not previous.get('command'), 'Custom PostgreSQL command needs review.')

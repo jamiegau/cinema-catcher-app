@@ -63,6 +63,9 @@ if args[:5] == ['compose', 'exec', '-T', 'pgdatabase', 'sh']:
             for args in (['migrate'], ['migrate', '--check'], ['check'], ['catcher_setup'])
         ])
         self.assertGreater(commands.index(['compose', 'up', '-d']), commands.index(runs[-1]))
+        aria_start = commands.index(['compose', 'up', '-d', '--no-deps', 'aria2server'])
+        self.assertGreater(aria_start, commands.index(runs[-2]))
+        self.assertLess(aria_start, commands.index(runs[-1]))
         self.assertEqual(commands[-1], ['compose', 'ps', '--all'])
         self.assertFalse(any('--volumes' in cmd or '-v' in cmd for cmd in commands))
 
@@ -78,6 +81,7 @@ if args[:5] == ['compose', 'exec', '-T', 'pgdatabase', 'sh']:
                      'compose run --rm --no-deps backend python3 ./manage.py migrate',
                      'compose run --rm --no-deps backend python3 ./manage.py migrate --check',
                      'compose run --rm --no-deps backend python3 ./manage.py check',
+                     'compose up -d --no-deps aria2server',
                      'compose run --rm --no-deps backend python3 ./manage.py catcher_setup'):
             with self.subTest(fail=fail):
                 result, commands = self.run_update(fail=fail)

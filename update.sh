@@ -42,11 +42,13 @@ if [[ "$database_ready" != true ]]; then
     exit 1
 fi
 
-# Only the database/cache and these short-lived migration containers may run
-# during the upgrade; do not implicitly start backend dependencies such as aria2.
+# Run schema checks before bringing up application dependencies.
 docker compose run --rm --no-deps backend python3 ./manage.py migrate
 docker compose run --rm --no-deps backend python3 ./manage.py migrate --check
 docker compose run --rm --no-deps backend python3 ./manage.py check
+# Setup applies download limits over aria2 RPC. Keep schedulers and workers
+# stopped until that configuration has completed successfully.
+docker compose up -d --no-deps aria2server
 docker compose run --rm --no-deps backend python3 ./manage.py catcher_setup
 docker compose up -d
 trap - ERR
